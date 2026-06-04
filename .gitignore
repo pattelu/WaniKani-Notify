@@ -25,3 +25,5 @@ htmlcov/
 Thumbs.db
 
 .env
+config.json
+main.spec

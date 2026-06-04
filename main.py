@@ -1,112 +1,38 @@
 import os
-import datetime
 import time
-import requests
 
 from plyer import notification
-from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
 
+import wk
 
-def add_wk_api_key():
-    user_api_key = input("Enter your WaniKani API key: ")
-    with open(".env", "w") as file:
-        file.write(f"WK_API_KEY={user_api_key}")
-    load_dotenv(dotenv_path='.env', override=True)
-    update_headers()
+def main():
+    if not os.path.exists("config.json"):
+        wk.add_wk_api_key()
 
-def wk_api_key_verification():
+    verification = True
+    while verification:
+        verification = wk.wk_api_key_verification()
+
+    # Check review with app start
+    user_notification()
+
+    scheduler = BackgroundScheduler()
+    start_scheduler(scheduler)
+
     try:
-        load_dotenv(dotenv_path='.env', override=True)
-        get_user_level()
-        print(f"Valid API key")
-        return False
-    except Exception as e:
-        print(e)
-        add_wk_api_key()
-        return True
+        while True:
+            time.sleep(1)
+    except(KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
 
-def update_headers():
-    headers = {
-        "Authorization": f"Bearer {os.getenv("WK_API_KEY")}",
-        "Wanikani-Revision": "20170710",
-    }
-
-    return headers
-
-def get_user_level():
-    user_request = "https://api.wanikani.com/v2/user"
-    user_response = requests.get(user_request, headers=update_headers())
-
-    if user_response.status_code == 200:
-        user_data = user_response.json()
-        user_level = user_data['data']['level']
-        return user_level
-    elif user_response.status_code == 401:
-        raise Exception("Invalid API Key")
-    else:
-        raise Exception("Exception")
-
-
-def get_assignments():
-    assignment_request = "https://api.wanikani.com/v2/assignments"
-
-    assignment_items = []
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-    while assignment_request:
-        assignment_response = requests.get(assignment_request, headers=update_headers())
-
-        if assignment_response.status_code == 200:
-            assignment_data = assignment_response.json()
-
-            for assignment in assignment_data['data']:
-                available_at_str = assignment['data'].get('available_at')
-                assignment_type = assignment['data'].get('subject_type')
-
-                if assignment_type == "kanji" or assignment_type == "radical":
-                    if available_at_str:
-                        available_at = datetime.datetime.fromisoformat(available_at_str.replace('Z', '+00:00'))
-
-                        if available_at <= now:
-                            assignment_items.append(assignment['data'].get('subject_id'))
-
-            next_url = assignment_data.get('pages', {}).get('next_url')
-
-            if next_url:
-                assignment_request = next_url
-            else:
-                assignment_request = None
-        else:
-            return f"HTTP error: {assignment_response.status_code}"
-    return assignment_items
-
-
-def get_items_to_review(user_level, assignment_items):
-    subjects_request = f"https://api.wanikani.com/v2/subjects?levels={user_level}"
-    subjects_response = requests.get(subjects_request, headers=update_headers())
-
-    items_to_review = []
-
-    if subjects_response.status_code == 200:
-        subject_data = subjects_response.json()
-
-        for subject in subject_data['data']:
-            current_level_subject_id = subject['id']
-
-            for item in assignment_items:
-                if item == current_level_subject_id:
-                    items_to_review.append(subject['data'])
-        return items_to_review
-    else:
-        return f"Error with status code: {subjects_response.status_code}"
 
 def user_notification():
     print(f"Script run on: {time.strftime('%H:%M:%S')}")
 
-    level = get_user_level()
-    assignments = get_assignments()
-    review = get_items_to_review(level, assignments)
+    level = wk.get_user_level()
+    assignments = wk.get_assignments()
+    review = wk.get_items_to_review(level, assignments)
 
     print(f"Current user level: {level}")
     print(f"All kanji and radicals to review: {len(assignments)}")
@@ -120,21 +46,11 @@ def user_notification():
             timeout=0,
         )
 
-if __name__ == "__main__":
-    if not os.path.exists('.env'):
-        add_wk_api_key()
-
-    verification = True
-    while verification:
-        verification = wk_api_key_verification()
-
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(user_notification, 'cron', minute=00, second=10)
+def start_scheduler(scheduler):
+    scheduler.add_job(user_notification, "cron", minute=00, second=10)
     scheduler.start()
-    print("Scheduler started")
+    print(f"Scheduler started. \n {scheduler.get_jobs()}")
 
-    try:
-        while True:
-            time.sleep(1)
-    except(KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
+
+if __name__ == "__main__":
+    main()
