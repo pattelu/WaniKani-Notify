@@ -7,24 +7,45 @@ from plyer import notification
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
 
-load_dotenv()
 
-headers = {
-    "Authorization": f"Bearer {os.getenv("WK_API_KEY")}",
-    "Wanikani-Revision": "20170710",
-}
+def add_wk_api_key():
+    user_api_key = input("Enter your WaniKani API key: ")
+    with open(".env", "w") as file:
+        file.write(f"WK_API_KEY={user_api_key}")
+    load_dotenv(dotenv_path='.env', override=True)
+    update_headers()
 
+def wk_api_key_verification():
+    try:
+        load_dotenv(dotenv_path='.env', override=True)
+        get_user_level()
+        print(f"Valid API key")
+        return False
+    except Exception as e:
+        print(e)
+        add_wk_api_key()
+        return True
+
+def update_headers():
+    headers = {
+        "Authorization": f"Bearer {os.getenv("WK_API_KEY")}",
+        "Wanikani-Revision": "20170710",
+    }
+
+    return headers
 
 def get_user_level():
     user_request = "https://api.wanikani.com/v2/user"
-    user_response = requests.get(user_request, headers=headers)
+    user_response = requests.get(user_request, headers=update_headers())
 
     if user_response.status_code == 200:
         user_data = user_response.json()
         user_level = user_data['data']['level']
         return user_level
+    elif user_response.status_code == 401:
+        raise Exception("Invalid API Key")
     else:
-        return f"Error with status code: {user_response.status_code}"
+        raise Exception("Exception")
 
 
 def get_assignments():
@@ -34,7 +55,7 @@ def get_assignments():
     now = datetime.datetime.now(datetime.timezone.utc)
 
     while assignment_request:
-        assignment_response = requests.get(assignment_request, headers=headers)
+        assignment_response = requests.get(assignment_request, headers=update_headers())
 
         if assignment_response.status_code == 200:
             assignment_data = assignment_response.json()
@@ -63,7 +84,7 @@ def get_assignments():
 
 def get_items_to_review(user_level, assignment_items):
     subjects_request = f"https://api.wanikani.com/v2/subjects?levels={user_level}"
-    subjects_response = requests.get(subjects_request, headers=headers)
+    subjects_response = requests.get(subjects_request, headers=update_headers())
 
     items_to_review = []
 
@@ -100,9 +121,17 @@ def user_notification():
         )
 
 if __name__ == "__main__":
+    if not os.path.exists('.env'):
+        add_wk_api_key()
+
+    verification = True
+    while verification:
+        verification = wk_api_key_verification()
+
     scheduler = BackgroundScheduler()
     scheduler.add_job(user_notification, 'cron', minute=00, second=10)
     scheduler.start()
+    print("Scheduler started")
 
     try:
         while True:
