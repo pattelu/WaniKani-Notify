@@ -1,56 +1,56 @@
-import os
-import time
+from PySide6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu, QPushButton, QLabel
+from PySide6.QtGui import QIcon, QAction
+from apscheduler.schedulers.qt import QtScheduler, QTimer
 
-from plyer import notification
-from apscheduler.schedulers.background import BackgroundScheduler
+import wk_notify as wkn
+from widgets.settings_window import SettingsWindow
 
-import wk
 
 def main():
-    if not os.path.exists("config.json"):
-        wk.add_wk_api_key()
+    app = QApplication([])
+    app.setQuitOnLastWindowClosed(False)
 
-    verification = True
-    while verification:
-        verification = wk.wk_api_key_verification()
+    # Tray
+    tray = QSystemTrayIcon()
+    tray.setIcon(QIcon("img/icon.png"))
+    tray.setVisible(True)
+
+    menu = QMenu()
+    settings = QAction("Settings")
+    menu.addAction(settings)
+    menu.addSeparator()
+    quit = QAction("Quit")
+    menu.addAction(quit)
+
+    tray.setContextMenu(menu)
+
+    # Notification on app start
+    wkn.start_notification()
 
     # Check review with app start
-    user_notification()
+    QTimer.singleShot(0, check_review_on_start)
 
-    scheduler = BackgroundScheduler()
-    start_scheduler(scheduler)
+    # Scheduler
+    scheduler = QtScheduler()
+    wkn.start_scheduler(scheduler)
 
+    # Settings Window
+    settings_window = SettingsWindow()
+
+    # Tray button functions
+    settings.triggered.connect(settings_window.show)
+    quit.triggered.connect(scheduler.shutdown)
+    quit.triggered.connect(app.quit)
+
+    # App execution
+    app.exec()
+
+
+def check_review_on_start():
     try:
-        while True:
-            time.sleep(1)
-    except(KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
-
-
-def user_notification():
-    print(f"Script run on: {time.strftime('%H:%M:%S')}")
-
-    level = wk.get_user_level()
-    assignments = wk.get_assignments()
-    review = wk.get_items_to_review(level, assignments)
-
-    print(f"Current user level: {level}")
-    print(f"All kanji and radicals to review: {len(assignments)}")
-    print(f"Current level kanji and radicals to review: {len(review)}")
-
-    if len(review) > 0:
-        notification.notify(
-            title=f"Critical review is ready!",
-            message=f"You have {len(review)} critical items to review.",
-            app_name="WaniKani Notify",
-            timeout=0,
-        )
-
-def start_scheduler(scheduler):
-    scheduler.add_job(user_notification, "cron", minute=00, second=10)
-    scheduler.start()
-    print(f"Scheduler started. \n {scheduler.get_jobs()}")
-
+        wkn.review_notification()
+    except Exception as e:
+        wkn.error_notification(e)
 
 if __name__ == "__main__":
     main()

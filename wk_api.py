@@ -4,21 +4,21 @@ import json
 
 headers = {}
 
-def add_wk_api_key():
-    user_api_key = input("Enter your WaniKani API key: ")
-    with open("config.json", "w") as file:
-        file.write(f'{{"wk_api_key": "{user_api_key}"}}')
-
-def wk_api_key_verification():
-    try:
-        get_headers()
-        get_user_level()
-        print(f"Valid API key")
-        return False
-    except Exception as e:
-        print(e)
-        add_wk_api_key()
-        return True
+# def add_wk_api_key():
+#     user_api_key = input("Enter your WaniKani API key: ")
+#     with open("config.json", "w") as file:
+#         file.write(f'{{"wk_api_key": "{user_api_key}"}}')
+#
+# def wk_api_key_verification():
+#     try:
+#         get_headers()
+#         get_user_level()
+#         print(f"Valid API key")
+#         return False
+#     except Exception as e:
+#         print(e)
+#         add_wk_api_key()
+#         return True
 
 def get_headers():
     with open("config.json", "r", encoding="utf-8") as f:
@@ -42,9 +42,9 @@ def get_user_level():
         user_level = user_data["data"]["level"]
         return user_level
     elif user_response.status_code == 401:
-        raise Exception("Invalid API Key")
+        raise Exception("invalid API Key")
     else:
-        raise Exception("Exception")
+        raise Exception("exception")
 
 
 def get_assignments():

@@ -27,3 +27,6 @@ Thumbs.db
 .env
 config.json
 main.spec
+*.kra
+*.ui
+article/
