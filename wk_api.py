@@ -4,25 +4,9 @@ import json
 
 headers = {}
 
-# def add_wk_api_key():
-#     user_api_key = input("Enter your WaniKani API key: ")
-#     with open("config.json", "w") as file:
-#         file.write(f'{{"wk_api_key": "{user_api_key}"}}')
-#
-# def wk_api_key_verification():
-#     try:
-#         get_headers()
-#         get_user_level()
-#         print(f"Valid API key")
-#         return False
-#     except Exception as e:
-#         print(e)
-#         add_wk_api_key()
-#         return True
-
 def get_headers():
-    with open("config.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
+    with open("config.json", "r", encoding="utf-8") as file:
+        config = json.load(file)
 
     api_key = config.get("wk_api_key")
     global headers
@@ -77,7 +61,7 @@ def get_assignments():
             else:
                 assignment_request = None
         else:
-            return f"HTTP error: {assignment_response.status_code}"
+            raise Exception(f"HTTP error: {assignment_response.status_code}")
     return assignment_items
 
 
@@ -98,4 +82,4 @@ def get_items_to_review(user_level, assignment_items):
                     items_to_review.append(subject["data"])
         return items_to_review
     else:
-        return f"Error with status code: {subjects_response.status_code}"
+        raise Exception(f"Error with status code: {subjects_response.status_code}")

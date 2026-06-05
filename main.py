@@ -16,6 +16,8 @@ def main():
     tray.setVisible(True)
 
     menu = QMenu()
+    check_review = QAction("Check reviews")
+    menu.addAction(check_review)
     settings = QAction("Settings")
     menu.addAction(settings)
     menu.addSeparator()
@@ -28,7 +30,7 @@ def main():
     wkn.start_notification()
 
     # Check review with app start
-    QTimer.singleShot(0, check_review_on_start)
+    QTimer.singleShot(10, user_review_check)
 
     # Scheduler
     scheduler = QtScheduler()
@@ -38,6 +40,7 @@ def main():
     settings_window = SettingsWindow()
 
     # Tray button functions
+    check_review.triggered.connect(user_review_check)
     settings.triggered.connect(settings_window.show)
     quit.triggered.connect(scheduler.shutdown)
     quit.triggered.connect(app.quit)
@@ -46,9 +49,10 @@ def main():
     app.exec()
 
 
-def check_review_on_start():
+def user_review_check():
+    wkn.check_in_progress_notification()
     try:
-        wkn.review_notification()
+        wkn.check_reviews(True)
     except Exception as e:
         wkn.error_notification(e)
 

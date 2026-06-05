@@ -19,7 +19,7 @@ def error_notification(e):
         timeout=10,
     )
 
-def review_notification():
+def check_reviews(notify_zero=False):
     print(f"Script run on: {time.strftime('%H:%M:%S')}")
 
     wk.get_headers()
@@ -31,7 +31,17 @@ def review_notification():
     print(f"All kanji and radicals to review: {len(assignments)}")
     print(f"Current level kanji and radicals to review: {len(review)}")
 
-    if len(review) > 0:
+    review_notification(review, notify_zero)
+
+
+def review_notification(review, notify_zero=False):
+    if notify_zero and len(review) == 0:
+        notification.notify(
+            title=f"No critical reviews now",
+            app_name="WaniKani Notify",
+            timeout=10,
+        )
+    else:
         notification.notify(
             title=f"Critical review is ready!",
             message=f"You have {len(review)} critical items to review.",
@@ -39,8 +49,15 @@ def review_notification():
             timeout=0,
         )
 
+def check_in_progress_notification():
+    notification.notify(
+        title=f"Checking reviews...",
+        app_name="WaniKani Notify",
+        timeout=10,
+    )
+
 def start_scheduler(scheduler):
-    scheduler.add_job(review_notification, "cron", minute=00, second=10)
+    scheduler.add_job(check_reviews, "cron", minute=00, second=10)
     # scheduler.add_job(review_notification, "interval", minutes=1)
     scheduler.start()
     print(f"Scheduler started")
