@@ -1,3 +1,6 @@
+import os.path
+from functools import partial
+
 from PySide6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu, QPushButton, QLabel
 from PySide6.QtGui import QIcon, QAction
 from apscheduler.schedulers.qt import QtScheduler, QTimer
@@ -16,8 +19,11 @@ def main():
     tray.setVisible(True)
 
     menu = QMenu()
+    check_lessons = QAction("Check lessons")
+    menu.addAction(check_lessons)
     check_review = QAction("Check reviews")
     menu.addAction(check_review)
+    menu.addSeparator()
     settings = QAction("Settings")
     menu.addAction(settings)
     menu.addSeparator()
@@ -26,21 +32,22 @@ def main():
 
     tray.setContextMenu(menu)
 
-    # Notification on app start
-    wkn.start_notification()
+    # Settings Window
+    settings_window = SettingsWindow()
 
-    # Check review with app start
-    QTimer.singleShot(10, user_review_check)
+    # Open settings if config.json doesn't exist else run review check
+    if not os.path.exists("config.json"):
+        settings_window.show()
+    else:
+        QTimer.singleShot(10, partial(user_check, "review"))
 
     # Scheduler
     scheduler = QtScheduler()
     wkn.start_scheduler(scheduler)
 
-    # Settings Window
-    settings_window = SettingsWindow()
-
     # Tray button functions
-    check_review.triggered.connect(user_review_check)
+    check_lessons.triggered.connect(partial(user_check, "lesson"))
+    check_review.triggered.connect(partial(user_check, "review"))
     settings.triggered.connect(settings_window.show)
     quit.triggered.connect(scheduler.shutdown)
     quit.triggered.connect(app.quit)
@@ -48,11 +55,10 @@ def main():
     # App execution
     app.exec()
 
-
-def user_review_check():
+def user_check(task_type):
     wkn.check_in_progress_notification()
     try:
-        wkn.check_reviews(True)
+        wkn.check_available_items(task_type,True)
     except Exception as e:
         wkn.error_notification(e)
 
