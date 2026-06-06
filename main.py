@@ -2,7 +2,11 @@ import os.path
 from functools import partial
 
 import sys
-from PySide6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu, QPushButton, QLabel
+from PySide6.QtWidgets import (
+    QApplication,
+    QSystemTrayIcon,
+    QMenu,
+)
 from PySide6.QtGui import QIcon, QAction
 from apscheduler.schedulers.qt import QtScheduler, QTimer
 
@@ -57,12 +61,14 @@ def main():
     # App execution
     app.exec()
 
+
 def user_check(task_type):
     wkn.check_in_progress_notification()
     try:
-        wkn.check_available_items(task_type,True)
+        wkn.check_available_items(task_type, True)
     except Exception as e:
         wkn.error_notification(e)
+
 
 def resource_path(relative_path):
     try:
@@ -71,6 +77,7 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
 
 if __name__ == "__main__":
     main()

@@ -1,27 +1,19 @@
-import time
 from functools import partial
-
 from plyer import notification
 import wk_api as wk
 import json
 
-def check_available_items(task_type, notify_zero=False):
-    print(f"Script run on: {time.strftime('%H:%M:%S')}")
 
+def check_available_items(task_type, notify_zero=False):
     wk.get_headers()
 
+    # Requests
     user_level = wk.get_user_level()
     query = create_query(task_type, user_level)
     assignments = wk.get_assignments(query)
 
-    print(f"Current user level: {user_level}")
-    print(f"You have: {assignments["total"]} {task_type} items.")
-    for key, value in assignments.items():
-        print(f"{key}: {value}".capitalize())
-
     items_notification(assignments, task_type, notify_zero)
 
-    print(f"Script ends on: {time.strftime('%H:%M:%S')}")
 
 def create_query(task_type, user_level):
     with open("config.json", "r") as file:
@@ -59,10 +51,10 @@ def create_query(task_type, user_level):
 
 # Scheduler
 def start_scheduler(scheduler):
-    scheduler.add_job(partial(check_available_items, "review"), "cron", minute=00, second=10)
-    # scheduler.add_job(review_notification, "interval", minutes=1)
+    scheduler.add_job(
+        partial(check_available_items, "review"), "cron", minute=00, second=10
+    )
     scheduler.start()
-    print(f"Scheduler started")
 
 
 # Notifications
@@ -74,6 +66,7 @@ def error_notification(e):
         timeout=10,
     )
 
+
 def check_in_progress_notification():
     notification.notify(
         message=f"Checking...",
@@ -81,22 +74,25 @@ def check_in_progress_notification():
         timeout=2,
     )
 
-def items_notification(assignments,task_type, notify_zero=False):
+
+def items_notification(assignments, task_type, notify_zero=False):
     gen_notification = generate_specific_notification(assignments, task_type)
 
-    if notify_zero and assignments["total"] == 0:
-        notification.notify(
-            message=f"Nothing to do",
-            app_name="WaniKani Notify",
-            timeout=5,
-        )
-    else:
+    if assignments["total"] > 0:
         notification.notify(
             title=f"{task_type}s are ready!".capitalize(),
             message=gen_notification,
             app_name="WaniKani Notify",
             timeout=0,
         )
+
+    if assignments["total"] == 0 and notify_zero:
+        notification.notify(
+            message=f"Nothing to do",
+            app_name="WaniKani Notify",
+            timeout=5,
+        )
+
 
 def generate_specific_notification(assignments, task_type):
     with open("config.json", "r") as file:
@@ -112,14 +108,16 @@ def generate_specific_notification(assignments, task_type):
         5: "Guru I",
         6: "Guru II",
         7: "Master",
-        8: "Enlightened"
+        8: "Enlightened",
     }
 
     srs = str(srs_translate[data["max_srs"]])
 
     if task_type == "lesson":
         if data["only_user_level"]:
-            gen_notification += f"On your user level you have {assignments["total"]} lessons ready. \n"
+            gen_notification += (
+                f"On your user level you have {assignments["total"]} lessons ready. \n"
+            )
         else:
             gen_notification += f"You have {assignments["total"]} lessons ready. \n"
 

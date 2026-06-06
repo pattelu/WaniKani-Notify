@@ -3,6 +3,7 @@ import json
 
 headers = {}
 
+
 def get_headers():
     with open("config.json", "r", encoding="utf-8") as file:
         config = json.load(file)
@@ -13,6 +14,7 @@ def get_headers():
         "Authorization": f"Bearer {api_key}",
         "Wanikani-Revision": "20170710",
     }
+
 
 def get_user_level():
     user_request = "https://api.wanikani.com/v2/user"
@@ -26,6 +28,7 @@ def get_user_level():
         raise Exception("invalid API key")
     else:
         raise Exception("exception")
+
 
 def get_assignments(query):
     assignment_request = f"https://api.wanikani.com/v2/assignments?{query}"
@@ -47,8 +50,11 @@ def get_assignments(query):
                     radical += 1
                 if assignment_type == "kanji":
                     kanji += 1
-                if assignment_type == "vocabulary" or assignment_type == "kana_vocabulary":
-                    vocabulary +=1
+                if (
+                    assignment_type == "vocabulary"
+                    or assignment_type == "kana_vocabulary"
+                ):
+                    vocabulary += 1
 
             next_url = assignment_data.get("pages", {}).get("next_url")
 
@@ -65,7 +71,7 @@ def get_assignments(query):
         "radical": radical,
         "kanji": kanji,
         "vocabulary": vocabulary,
-        "total": total
+        "total": total,
     }
 
     return assignment_items
