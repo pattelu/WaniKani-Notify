@@ -33,7 +33,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Build Executable
-      run: pyinstaller --onefile main.py
+      run: pyinstaller main.spec
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:

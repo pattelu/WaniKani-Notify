@@ -1,6 +1,7 @@
 import os.path
 from functools import partial
 
+import sys
 from PySide6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu, QPushButton, QLabel
 from PySide6.QtGui import QIcon, QAction
 from apscheduler.schedulers.qt import QtScheduler, QTimer
@@ -15,7 +16,8 @@ def main():
 
     # Tray
     tray = QSystemTrayIcon()
-    tray.setIcon(QIcon("img/icon.png"))
+    icon_path = resource_path("img/icon.png")
+    tray.setIcon(QIcon(icon_path))
     tray.setVisible(True)
 
     menu = QMenu()
@@ -61,6 +63,14 @@ def user_check(task_type):
         wkn.check_available_items(task_type,True)
     except Exception as e:
         wkn.error_notification(e)
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 if __name__ == "__main__":
     main()
