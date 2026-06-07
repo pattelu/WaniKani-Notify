@@ -27,5 +27,6 @@ Thumbs.db
 .env
 config.json
 *.kra
+*.pxo
 *.ui
 article/
