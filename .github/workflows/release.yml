@@ -5,9 +5,6 @@ on:
 
 name: Create Release
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     strategy:
@@ -25,7 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Set up Python 3.13
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: "3.13"
     - name: Install system dependencies
@@ -43,7 +40,7 @@ jobs:
     - name: Build Executable
       run: pyinstaller main.spec
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: WaniKani-Notify_${{ matrix.os }}
         path: dist/
