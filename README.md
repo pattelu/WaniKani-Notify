@@ -1,17 +1,43 @@
-## WIP (Not ready to use)
+<p align="center">
+    <img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/icon.png?raw=true" style="background-color: #000000;" alt="WaniKani-Notify" />
+</p>
 
-The app is still a work in progress, and even basic functionality may not work properly. 
-
-It's possible that more features and options will be added in the future.
-
-For now, create a .env file in the same directory as main.py and add your API key. Use .env.example as a reference.
+<h1 align="center">WaniKani Notify</h1>
+<p align="center">
+    <b>Don't forget about your reviews!</b>
+</p>
+<p align="center">
+    <a href="https://github.com/pattelu/WaniKani-Notify/releases"><b>Download</b></a>
+</p>
 
 ---
 
-## What's the plan
+### What does it do?
+- The app will show a notification when new reviews are ready for you.
+- You can also manually check whether reviews or lessons are available.
+- In the settings, you can customize notifications.
 
-Simple app that runs at system startup and checks every hour whether kanji and radicals from the user's current level are available for review.
+It's recommended to run the app at system startup so you don't miss anything!
 
-It's easy to forget to review radicals and kanji when they become available, so this app notifies you when they're ready for review.
+### How it looks?
+Notifications: </br>
+<div style="padding-left: 50px">
+<img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/lessons_ss.png?raw=true" alt="lessons notification" /></br>
+<img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/reviews_ss.png?raw=true" alt="reviews notification" /></br></br>
+</div>
 
-Notification is displayed until user doesn't close it manually.
+Tray:</br>
+<div style="padding-left: 50px">
+<img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/tray_menu_ss.png?raw=true" alt="tray menu" /></br>
+<img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/tray_ss.png?raw=true" alt="tray" /></br></br>
+</div>
+
+Settings:</br>
+<div style="padding-left: 50px">
+<img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/settings_ss.png?raw=true" alt="settings" /></br>
+</div>
+
+---
+
+### Notes
+The app has only been tested on Linux (CachyOS). If you encounter any issues, please let me know.
