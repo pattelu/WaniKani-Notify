@@ -54,7 +54,7 @@ def main():
     # Tray button functions
     check_lessons.triggered.connect(partial(user_check, "lesson"))
     check_review.triggered.connect(partial(user_check, "review"))
-    settings.triggered.connect(settings_window.show)
+    settings.triggered.connect(partial(open_settings, settings_window))
     quit.triggered.connect(scheduler.shutdown)
     quit.triggered.connect(app.quit)
 
@@ -68,6 +68,11 @@ def user_check(task_type):
         wkn.check_available_items(task_type, True)
     except Exception as e:
         wkn.error_notification(e)
+
+
+def open_settings(settings_window):
+    settings_window.check_config()
+    settings_window.show()
 
 
 def resource_path(relative_path):
