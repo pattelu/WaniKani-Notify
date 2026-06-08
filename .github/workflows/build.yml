@@ -40,6 +40,10 @@ jobs:
         pip install -r requirements.txt
     - name: Build Executable
       run: pyinstaller main.spec
+    - name: Rename binary
+      if: matrix.name == 'linux' || matrix.name == 'macos'
+      shell: bash
+      run: mv dist/wknotify* dist/wknotify_${{ matrix.name }}
     - name: Upload Artifact
       uses: actions/upload-artifact@v7
       with:

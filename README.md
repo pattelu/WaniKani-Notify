@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/icon.png?raw=true" style="background-color: #000000;" alt="WaniKani-Notify" />
+    <img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/icon.png?raw=true" alt="WaniKani-Notify" />
 </p>
 
 <h1 align="center">WaniKani Notify</h1>

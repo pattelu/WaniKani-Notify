@@ -88,7 +88,7 @@ def items_notification(assignments, task_type, notify_zero=False):
 
     if assignments["total"] == 0 and notify_zero:
         notification.notify(
-            message=f"Nothing to do",
+            message=f"No new {task_type}s",
             app_name="WaniKani Notify",
             timeout=5,
         )
@@ -136,10 +136,16 @@ def generate_specific_notification(assignments, task_type):
                 gen_notification += f"Vocabulary: {assignments["vocabulary"]} \n"
 
     if task_type == "review":
-        if data["only_user_level"]:
-            gen_notification += f"On your user level you have {assignments["total"]} items below SRS {srs} ready to review. \n"
+        if data["max_srs"] >= 8:
+            if data["only_user_level"]:
+                gen_notification += f"On your user level you have {assignments["total"]} reviews ready. \n"
+            else:
+                gen_notification += f"You have {assignments["total"]} reviews ready. \n"
         else:
-            gen_notification += f"You have {assignments["total"]} items below SRS {srs} ready to review. \n"
+            if data["only_user_level"]:
+                gen_notification += f"On your user level you have {assignments["total"]} items equal or below SRS {srs} ready to review. \n"
+            else:
+                gen_notification += f"You have {assignments["total"]} items equal or below SRS {srs} ready to review. \n"
 
         gen_notification += "-----\n"
 
