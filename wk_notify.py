@@ -15,38 +15,61 @@ def check_available_items(task_type, notify_zero=False):
     items_notification(assignments, task_type, notify_zero)
 
 
-def create_query(task_type, user_level):
+def create_query(task_type, user_level, subject_type=None):
     with open("config.json", "r") as file:
         data = json.load(file)
 
-    query = ""
-    if task_type == "lesson":
-        query += "immediately_available_for_lessons"
+    query_list = []
 
-        if data["only_user_level"]:
+    if task_type == "lesson":
+        query = "immediately_available_for_lessons"
+
+        if data["lessons"]["only_user_level"]:
             query += f"&levels={user_level}"
 
         query += "&subject_types="
-        for key, value in data["lessons"].items():
+        items = list(data["lessons"].items())
+        for key, value in items[:-1]:
             if value:
                 query += f"{key},"
+
+        query_list.append(query)
 
     if task_type == "review":
-        query += f"immediately_available_for_review&srs_stages="
 
-        srs = data["max_srs"]
-        while srs > 0:
-            query += f"{srs},"
-            srs -= 1
+        base = "immediately_available_for_review&subject_types="
 
-        if data["only_user_level"]:
-            query += f"&levels={user_level}"
-
-        query += "&subject_types="
+        rev_types = []
         for key, value in data["reviews"].items():
-            if value:
-                query += f"{key},"
-    return query
+            if value["is_checked"]:
+                rev_types.append(key)
+
+        for item in rev_types:
+            if item == "radical":
+                query = (
+                    base
+                    + f"radical&srs_stages={data["reviews"]["radical"]["srs_stages"]}"
+                )
+                if data["reviews"]["radical"]["only_user_level"]:
+                    query += f"&levels={user_level}"
+                query_list.append(query)
+            if item == "kanji":
+                query = (
+                    base + f"kanji&srs_stages={data["reviews"]["kanji"]["srs_stages"]}"
+                )
+                if data["reviews"]["kanji"]["only_user_level"]:
+                    query += f"&levels={user_level}"
+                query_list.append(query)
+            if item == "vocabulary":
+                query = (
+                    base
+                    + f"vocabulary,kana_vocabulary&srs_stages={data["reviews"]["vocabulary"]["srs_stages"]}"
+                )
+                if data["reviews"]["vocabulary"]["only_user_level"]:
+                    query += f"&levels={user_level}"
+                query_list.append(query)
+
+    return query_list
 
 
 # Scheduler
@@ -100,21 +123,8 @@ def generate_specific_notification(assignments, task_type):
 
     gen_notification = ""
 
-    srs_translate = {
-        1: "Apprentice I",
-        2: "Apprentice II",
-        3: "Apprentice III",
-        4: "Apprentice IV",
-        5: "Guru I",
-        6: "Guru II",
-        7: "Master",
-        8: "Enlightened",
-    }
-
-    srs = str(srs_translate[data["max_srs"]])
-
     if task_type == "lesson":
-        if data["only_user_level"]:
+        if data["lessons"]["only_user_level"]:
             gen_notification += (
                 f"On your user level you have {assignments["total"]} lessons ready. \n"
             )
@@ -136,29 +146,35 @@ def generate_specific_notification(assignments, task_type):
                 gen_notification += f"Vocabulary: {assignments["vocabulary"]} \n"
 
     if task_type == "review":
-        if data["max_srs"] >= 8:
-            if data["only_user_level"]:
-                gen_notification += f"On your user level you have {assignments["total"]} reviews ready. \n"
-            else:
-                gen_notification += f"You have {assignments["total"]} reviews ready. \n"
-        else:
-            if data["only_user_level"]:
-                gen_notification += f"On your user level you have {assignments["total"]} items equal or below SRS {srs} ready to review. \n"
-            else:
-                gen_notification += f"You have {assignments["total"]} items equal or below SRS {srs} ready to review. \n"
-
+        gen_notification += f"You have {assignments["total"]} reviews ready. \n"
         gen_notification += "-----\n"
 
-        if data["reviews"]["radical"]:
+        if data["reviews"]["radical"]["is_checked"]:
             if assignments["radical"] > 0:
-                gen_notification += f"Radicals: {assignments["radical"]} \n"
+                gen_notification += f"Radicals: {assignments["radical"]} "
+                if assignments["radical_burn"] > 0:
+                    gen_notification += (
+                        f"(Ready to burn: {assignments["radical_burn"]})\n"
+                    )
+                else:
+                    gen_notification += "\n"
 
-        if data["reviews"]["kanji"]:
+        if data["reviews"]["kanji"]["is_checked"]:
             if assignments["kanji"] > 0:
-                gen_notification += f"Kanji: {assignments["kanji"]} \n"
+                gen_notification += f"Kanji: {assignments["kanji"]} "
+                if assignments["kanji_burn"] > 0:
+                    gen_notification += (
+                        f"(Ready to burn: {assignments["kanji_burn"]})\n"
+                    )
+                else:
+                    gen_notification += "\n"
 
-        if data["reviews"]["vocabulary"]:
+        if data["reviews"]["vocabulary"]["is_checked"]:
             if assignments["vocabulary"] > 0:
-                gen_notification += f"Vocabulary: {assignments["vocabulary"]} \n"
+                gen_notification += f"Vocabulary: {assignments["vocabulary"]} "
+                if assignments["vocabulary_burn"] > 0:
+                    gen_notification += (
+                        f"(Ready to burn: {assignments["vocabulary_burn"]})"
+                    )
 
     return gen_notification

@@ -30,40 +30,51 @@ def get_user_level():
         raise Exception("exception")
 
 
-def get_assignments(query):
-    assignment_request = f"https://api.wanikani.com/v2/assignments?{query}"
-
+def get_assignments(query_list):
     radical = 0
     kanji = 0
     vocabulary = 0
+    radical_burn = 0
+    kanji_burn = 0
+    vocabulary_burn = 0
 
-    while assignment_request:
-        assignment_response = requests.get(assignment_request, headers=headers)
+    for query in query_list:
+        assignment_request = f"https://api.wanikani.com/v2/assignments?{query}"
 
-        if assignment_response.status_code == 200:
-            assignment_data = assignment_response.json()
+        while assignment_request:
+            assignment_response = requests.get(assignment_request, headers=headers)
 
-            for assignment in assignment_data["data"]:
-                assignment_type = assignment["data"].get("subject_type")
+            if assignment_response.status_code == 200:
+                assignment_data = assignment_response.json()
 
-                if assignment_type == "radical":
-                    radical += 1
-                if assignment_type == "kanji":
-                    kanji += 1
-                if (
-                    assignment_type == "vocabulary"
-                    or assignment_type == "kana_vocabulary"
-                ):
-                    vocabulary += 1
+                for assignment in assignment_data["data"]:
 
-            next_url = assignment_data.get("pages", {}).get("next_url")
+                    assignment_type = assignment["data"].get("subject_type")
+                    assignment_srs = assignment["data"].get("srs_stage")
+                    if assignment_type == "radical":
+                        radical += 1
+                        if assignment_srs == 8:
+                            radical_burn += 1
+                    if assignment_type == "kanji":
+                        kanji += 1
+                        if assignment_srs == 8:
+                            kanji_burn += 1
+                    if (
+                        assignment_type == "vocabulary"
+                        or assignment_type == "kana_vocabulary"
+                    ):
+                        vocabulary += 1
+                        if assignment_srs == 8:
+                            vocabulary_burn += 1
 
-            if next_url:
-                assignment_request = next_url
+                next_url = assignment_data.get("pages", {}).get("next_url")
+
+                if next_url:
+                    assignment_request = next_url
+                else:
+                    assignment_request = None
             else:
-                assignment_request = None
-        else:
-            raise Exception(f"HTTP error: {assignment_response.status_code}")
+                raise Exception(f"HTTP error: {assignment_response.status_code}")
 
     total = radical + kanji + vocabulary
 
@@ -71,6 +82,9 @@ def get_assignments(query):
         "radical": radical,
         "kanji": kanji,
         "vocabulary": vocabulary,
+        "radical_burn": radical_burn,
+        "kanji_burn": kanji_burn,
+        "vocabulary_burn": vocabulary_burn,
         "total": total,
     }
 
