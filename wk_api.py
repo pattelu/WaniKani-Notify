@@ -1,3 +1,5 @@
+from datetime import datetime, timezone, timedelta
+
 import requests
 import json
 
@@ -31,12 +33,8 @@ def get_user_level():
 
 
 def get_assignments(query_list):
-    radical = 0
-    kanji = 0
-    vocabulary = 0
-    radical_burn = 0
-    kanji_burn = 0
-    vocabulary_burn = 0
+
+    assignments_list = []
 
     for query in query_list:
         assignment_request = f"https://api.wanikani.com/v2/assignments?{query}"
@@ -50,22 +48,15 @@ def get_assignments(query_list):
                 for assignment in assignment_data["data"]:
 
                     assignment_type = assignment["data"].get("subject_type")
-                    assignment_srs = assignment["data"].get("srs_stage")
                     if assignment_type == "radical":
-                        radical += 1
-                        if assignment_srs == 8:
-                            radical_burn += 1
+                        assignments_list.append(assignment)
                     if assignment_type == "kanji":
-                        kanji += 1
-                        if assignment_srs == 8:
-                            kanji_burn += 1
+                        assignments_list.append(assignment)
                     if (
                         assignment_type == "vocabulary"
                         or assignment_type == "kana_vocabulary"
                     ):
-                        vocabulary += 1
-                        if assignment_srs == 8:
-                            vocabulary_burn += 1
+                        assignments_list.append(assignment)
 
                 next_url = assignment_data.get("pages", {}).get("next_url")
 
@@ -75,6 +66,34 @@ def get_assignments(query_list):
                     assignment_request = None
             else:
                 raise Exception(f"HTTP error: {assignment_response.status_code}")
+
+    return assignments_list
+
+
+def count_assignments(assignments_list):
+    radical = 0
+    kanji = 0
+    vocabulary = 0
+    radical_burn = 0
+    kanji_burn = 0
+    vocabulary_burn = 0
+
+    for assignment in assignments_list:
+        if assignment["data"]["subject_type"] == "radical":
+            radical += 1
+            if assignment["data"]["srs_stage"] == 8:
+                radical_burn += 1
+        if assignment["data"]["subject_type"] == "kanji":
+            kanji += 1
+            if assignment["data"]["srs_stage"] == 8:
+                kanji_burn += 1
+        if (
+            assignment["data"]["subject_type"] == "vocabulary"
+            or assignment["data"]["subject_type"] == "kana_vocabulary"
+        ):
+            vocabulary += 1
+            if assignment["data"]["srs_stage"] == 8:
+                vocabulary_burn += 1
 
     total = radical + kanji + vocabulary
 
@@ -89,3 +108,41 @@ def get_assignments(query_list):
     }
 
     return assignment_items
+
+
+def get_future_assignments():
+    current = datetime.now(timezone.utc)
+
+    result = []
+    query = ["immediately_available_for_review"]
+
+    all_assignments = get_assignments(query)
+    all_assignments_ids = []
+
+    for item in all_assignments:
+        all_assignments_ids.append(item["id"])
+
+    while True:
+        next_time = current + timedelta(hours=1)
+
+        available_after = next_time.replace(minute=0, second=0, microsecond=0)
+        available_before = next_time.replace(minute=59, second=0, microsecond=0)
+
+        after_str = available_after.strftime("%Y-%m-%dT%H:%M:%SZ")
+        before_str = available_before.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        query = [f"avaliable_after={after_str}&available_before={before_str}"]
+
+        future_assignment = get_assignments(query)
+
+        for element in future_assignment:
+            if element["id"] not in all_assignments_ids:
+                result.append(future_assignment)
+
+        if not result:
+            current = next_time
+            continue
+        else:
+            future_review = {"time": after_str, "items": len(result)}
+
+            return future_review

@@ -10,9 +10,15 @@ def check_available_items(task_type, notify_zero=False):
     # Requests
     user_level = wk.get_user_level()
     query = create_query(task_type, user_level)
-    assignments = wk.get_assignments(query)
+    assignments_list = wk.get_assignments(query)
+    count = wk.count_assignments(assignments_list)
 
-    items_notification(assignments, task_type, notify_zero)
+    items_notification(count, task_type, notify_zero)
+
+
+def check_closest_review():
+    reviews = wk.get_future_assignments()
+    future_notification(reviews)
 
 
 def create_query(task_type, user_level, subject_type=None):
@@ -115,6 +121,15 @@ def items_notification(assignments, task_type, notify_zero=False):
             app_name="WaniKani Notify",
             timeout=5,
         )
+
+
+def future_notification(info):
+    notification.notify(
+        message=f"Closest review at: {info["time"]} \n"
+        f"Number of items: {info["items"]}",
+        app_name="WaniKani Notify",
+        timeout=5,
+    )
 
 
 def generate_specific_notification(assignments, task_type):

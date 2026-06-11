@@ -107,13 +107,13 @@ class SettingsWindow(QWidget, Ui_Settings):
             self.check_user_level_review_radicals.setChecked(
                 data["reviews"]["radical"]["only_user_level"]
             )
-
             for button in self.check_srs_radicals_buttons:
                 getattr(self, button.objectName()).setChecked(False)
-            for number in (
-                data["reviews"]["radical"]["srs_stages"].strip(",").split(",")
-            ):
-                getattr(self, f"check_srs_radicals_{number}").setChecked(True)
+            if data["reviews"]["radical"]["srs_stages"] != "":
+                for number in (
+                    data["reviews"]["radical"]["srs_stages"].strip(",").split(",")
+                ):
+                    getattr(self, f"check_srs_radicals_{number}").setChecked(True)
 
             self.check_r_kanji.setChecked(data["reviews"]["kanji"]["is_checked"])
             self.check_user_level_review_kanji.setChecked(
@@ -121,21 +121,25 @@ class SettingsWindow(QWidget, Ui_Settings):
             )
             for button in self.check_srs_kanji_buttons:
                 getattr(self, button.objectName()).setChecked(False)
-            for number in data["reviews"]["kanji"]["srs_stages"].strip(",").split(","):
-                getattr(self, f"check_srs_kanji_{number}").setChecked(True)
+            if data["reviews"]["kanji"]["srs_stages"] != "":
+                for number in (
+                    data["reviews"]["kanji"]["srs_stages"].strip(",").split(",")
+                ):
+                    getattr(self, f"check_srs_kanji_{number}").setChecked(True)
 
             self.check_r_vocabulary.setChecked(
                 data["reviews"]["vocabulary"]["is_checked"]
             )
-            self.check_user_level_review_kanji.setChecked(
+            self.check_user_level_review_vocabulary.setChecked(
                 data["reviews"]["vocabulary"]["only_user_level"]
             )
             for button in self.check_srs_vocabulary_buttons:
                 getattr(self, button.objectName()).setChecked(False)
-            for number in (
-                data["reviews"]["vocabulary"]["srs_stages"].strip(",").split(",")
-            ):
-                getattr(self, f"check_srs_vocabulary_{number}").setChecked(True)
+            if data["reviews"]["vocabulary"]["srs_stages"] != "":
+                for number in (
+                    data["reviews"]["vocabulary"]["srs_stages"].strip(",").split(",")
+                ):
+                    getattr(self, f"check_srs_vocabulary_{number}").setChecked(True)
 
         else:
             self.text_api.setText("Enter WaniKani API key")

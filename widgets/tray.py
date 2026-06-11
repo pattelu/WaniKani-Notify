@@ -23,6 +23,8 @@ class Tray(QSystemTrayIcon):
         self.menu.addAction(self.check_lessons)
         self.check_review = QAction("Check reviews")
         self.menu.addAction(self.check_review)
+        self.closest_review = QAction("Closest reviews")
+        self.menu.addAction(self.closest_review)
         self.menu.addSeparator()
         self.settings = QAction("Settings")
         self.menu.addAction(self.settings)
@@ -35,6 +37,7 @@ class Tray(QSystemTrayIcon):
         # Tray button functions
         self.check_lessons.triggered.connect(partial(user_check, "lesson"))
         self.check_review.triggered.connect(partial(user_check, "review"))
+        self.closest_review.triggered.connect(check_closest_review)
         self.settings.triggered.connect(self.open_settings)
         self.quit.triggered.connect(self.quit_app)
 
@@ -56,6 +59,18 @@ def user_check(task_type):
                 task_type,
                 True,
             ),
+            daemon=True,
+        ).start()
+    except Exception as e:
+        wkn.error_notification(e)
+
+
+def check_closest_review():
+    wkn.check_in_progress_notification()
+    try:
+        Thread(
+            target=wkn.check_closest_review,
+            args=(),
             daemon=True,
         ).start()
     except Exception as e:
