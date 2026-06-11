@@ -28,9 +28,6 @@ class SettingsWindow(QWidget, Ui_Settings):
         self.btn_save.clicked.connect(self.save_settings)
         self.btn_quit.clicked.connect(self.quit_settings)
 
-        # Start function on start
-        self.check_config()
-
         # Additional options visibility
         self.check_r_radicals.toggled.connect(self.widget_radicals_srs.setVisible)
         self.check_r_kanji.toggled.connect(self.widget_kanji_srs.setVisible)
@@ -43,7 +40,7 @@ class SettingsWindow(QWidget, Ui_Settings):
         if not self.check_r_vocabulary.isChecked():
             self.widget_vocabulary_srs.setVisible(False)
 
-        # SRS buttons
+        # SRS buttons lists
         self.check_srs_radicals_buttons = [
             self.check_srs_radicals_1,
             self.check_srs_radicals_2,
@@ -74,6 +71,9 @@ class SettingsWindow(QWidget, Ui_Settings):
             self.check_srs_vocabulary_7,
             self.check_srs_vocabulary_8,
         ]
+
+        # Start function on start
+        self.check_config()
 
     def test_api(self):
         self.save_settings()
@@ -107,6 +107,9 @@ class SettingsWindow(QWidget, Ui_Settings):
             self.check_user_level_review_radicals.setChecked(
                 data["reviews"]["radical"]["only_user_level"]
             )
+
+            for button in self.check_srs_radicals_buttons:
+                getattr(self, button.objectName()).setChecked(False)
             for number in (
                 data["reviews"]["radical"]["srs_stages"].strip(",").split(",")
             ):
@@ -116,6 +119,8 @@ class SettingsWindow(QWidget, Ui_Settings):
             self.check_user_level_review_kanji.setChecked(
                 data["reviews"]["kanji"]["only_user_level"]
             )
+            for button in self.check_srs_kanji_buttons:
+                getattr(self, button.objectName()).setChecked(False)
             for number in data["reviews"]["kanji"]["srs_stages"].strip(",").split(","):
                 getattr(self, f"check_srs_kanji_{number}").setChecked(True)
 
@@ -125,6 +130,8 @@ class SettingsWindow(QWidget, Ui_Settings):
             self.check_user_level_review_kanji.setChecked(
                 data["reviews"]["vocabulary"]["only_user_level"]
             )
+            for button in self.check_srs_vocabulary_buttons:
+                getattr(self, button.objectName()).setChecked(False)
             for number in (
                 data["reviews"]["vocabulary"]["srs_stages"].strip(",").split(",")
             ):
@@ -170,4 +177,5 @@ class SettingsWindow(QWidget, Ui_Settings):
     def quit_settings(self):
         self.label_test_api.setText(f"")
         self.label_info.setText(f"")
+        self.check_config()
         self.close()

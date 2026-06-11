@@ -43,6 +43,7 @@ class Tray(QSystemTrayIcon):
         QApplication.quit()
 
     def open_settings(self):
+        # self.settings_window.check_config()
         self.settings_window.show()
 
 
