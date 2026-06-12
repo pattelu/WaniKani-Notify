@@ -114,7 +114,9 @@ def count_assignments(assignments_list):
 def get_future_assignments(query_future):
     current = datetime.now(timezone.utc)
     now = datetime.now(timezone.utc)
-
+    limit_time = now.replace(
+        day=now.day + 1, hour=3, minute=0, second=0, microsecond=0
+    )
     radicals = 0
     kanji = 0
     vocabulary = 0
@@ -135,9 +137,7 @@ def get_future_assignments(query_future):
         query_new = []
 
         next_time = current + timedelta(hours=1)
-        limit_time = now.replace(
-            day=now.day + 1, hour=3, minute=0, second=0, microsecond=0
-        )
+
         available_after = next_time.replace(minute=0, second=0, microsecond=0)
         available_before = next_time.replace(minute=59, second=0, microsecond=0)
 

@@ -206,7 +206,7 @@ def generate_specific_notification(assignments, task_type):
                     gen_notification += (
                         f"(Ready to burn: {assignments["vocabulary_burn"]}) "
                     )
-                if data["reviews"]["kanji"]["only_user_level"]:
+                if data["reviews"]["vocabulary"]["only_user_level"]:
                     gen_notification += f"- only user level."
 
     if task_type == "future":
