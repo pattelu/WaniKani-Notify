@@ -139,7 +139,7 @@ def future_notification(info):
         notification.notify(
             message=gen_notification,
             app_name="WaniKani Notify",
-            timeout=5,
+            timeout=0,
         )
 
 
