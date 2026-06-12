@@ -318,6 +318,7 @@ dependencies = [
     { name = "pyinstaller" },
     { name = "pyside6" },
     { name = "requests" },
+    { name = "tzlocal" },
 ]
 
 [package.metadata]
@@ -328,4 +329,5 @@ requires-dist = [
     { name = "pyinstaller", specifier = ">=6.20.0" },
     { name = "pyside6", specifier = ">=6.11.1" },
     { name = "requests", specifier = ">=2.34.2" },
+    { name = "tzlocal", specifier = ">=5.3.1" },
 ]

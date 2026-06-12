@@ -66,7 +66,7 @@ def user_check(task_type):
 
 
 def check_closest_review():
-    wkn.check_in_progress_notification()
+    wkn.check_in_progress_notification(10)
     try:
         Thread(
             target=wkn.check_closest_review,

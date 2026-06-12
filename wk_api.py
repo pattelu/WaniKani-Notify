@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+import tzlocal
 
 import requests
 import json
@@ -110,8 +111,16 @@ def count_assignments(assignments_list):
     return assignment_items
 
 
-def get_future_assignments():
+def get_future_assignments(query_future):
     current = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc)
+
+    radicals = 0
+    kanji = 0
+    vocabulary = 0
+    radicals_burn = 0
+    kanji_burn = 0
+    vocabulary_burn = 0
 
     result = []
     query = ["immediately_available_for_review"]
@@ -123,26 +132,66 @@ def get_future_assignments():
         all_assignments_ids.append(item["id"])
 
     while True:
-        next_time = current + timedelta(hours=1)
+        query_new = []
 
+        next_time = current + timedelta(hours=1)
+        limit_time = now.replace(
+            day=now.day + 1, hour=3, minute=0, second=0, microsecond=0
+        )
         available_after = next_time.replace(minute=0, second=0, microsecond=0)
         available_before = next_time.replace(minute=59, second=0, microsecond=0)
 
         after_str = available_after.strftime("%Y-%m-%dT%H:%M:%SZ")
         before_str = available_before.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        query = [f"avaliable_after={after_str}&available_before={before_str}"]
+        for i in range(len(query_future)):
+            query_item = (
+                query_future[i]
+                + f"&avaliable_after={after_str}&available_before={before_str}"
+            )
+            query_new.append(query_item)
 
-        future_assignment = get_assignments(query)
+        future_assignment = get_assignments(query_new)
 
         for element in future_assignment:
             if element["id"] not in all_assignments_ids:
                 result.append(future_assignment)
+                if element["data"]["subject_type"] == "radical":
+                    radicals += 1
+                    if element["data"]["srs_stage"] == 8:
+                        radicals_burn += 1
+                if element["data"]["subject_type"] == "kanji":
+                    kanji += 1
+                    if element["data"]["srs_stage"] == 8:
+                        kanji_burn += 1
+                if (
+                    element["data"]["subject_type"] == "vocabulary"
+                    or element["data"]["subject_type"] == "kana_vocabulary"
+                ):
+                    vocabulary += 1
+                    if element["data"]["srs_stage"] == 8:
+                        vocabulary_burn += 1
 
+        if available_after == limit_time:
+            no_review = {"time": 0}
+            return no_review
         if not result:
             current = next_time
             continue
         else:
-            future_review = {"time": after_str, "items": len(result)}
+
+            local_tz = tzlocal.get_localzone()
+            local_time = available_after.astimezone(local_tz).strftime("%H:%M")
+
+            future_review = {
+                "time": local_time,
+                "total": len(result),
+                "radicals": radicals,
+                "kanji": kanji,
+                "vocabulary": vocabulary,
+                "radicals_burn": radicals_burn,
+                "kanji_burn": kanji_burn,
+                "vocabulary_burn": vocabulary_burn,
+            }
 
             return future_review

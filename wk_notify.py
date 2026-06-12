@@ -17,11 +17,13 @@ def check_available_items(task_type, notify_zero=False):
 
 
 def check_closest_review():
-    reviews = wk.get_future_assignments()
+    user_level = wk.get_user_level()
+    query = create_query("review", user_level, True)
+    reviews = wk.get_future_assignments(query)
     future_notification(reviews)
 
 
-def create_query(task_type, user_level, subject_type=None):
+def create_query(task_type, user_level, future=False):
     with open("config.json", "r") as file:
         data = json.load(file)
 
@@ -42,8 +44,10 @@ def create_query(task_type, user_level, subject_type=None):
         query_list.append(query)
 
     if task_type == "review":
-
-        base = "immediately_available_for_review&subject_types="
+        if future:
+            base = "subject_types="
+        else:
+            base = "immediately_available_for_review&subject_types="
 
         rev_types = []
         for key, value in data["reviews"].items():
@@ -96,11 +100,11 @@ def error_notification(e):
     )
 
 
-def check_in_progress_notification():
+def check_in_progress_notification(time=2):
     notification.notify(
         message=f"Checking...",
         app_name="WaniKani Notify",
-        timeout=2,
+        timeout=time,
     )
 
 
@@ -124,12 +128,19 @@ def items_notification(assignments, task_type, notify_zero=False):
 
 
 def future_notification(info):
-    notification.notify(
-        message=f"Closest review at: {info["time"]} \n"
-        f"Number of items: {info["items"]}",
-        app_name="WaniKani Notify",
-        timeout=5,
-    )
+    if info["time"] == 0:
+        notification.notify(
+            message=f"No more new reviews for today!",
+            app_name="WaniKani Notify",
+            timeout=5,
+        )
+    else:
+        gen_notification = generate_specific_notification(info, "future")
+        notification.notify(
+            message=gen_notification,
+            app_name="WaniKani Notify",
+            timeout=5,
+        )
 
 
 def generate_specific_notification(assignments, task_type):
@@ -137,14 +148,18 @@ def generate_specific_notification(assignments, task_type):
         data = json.load(file)
 
     gen_notification = ""
+    plural = ""
+
+    if assignments["total"] > 1:
+        plural = "s"
 
     if task_type == "lesson":
         if data["lessons"]["only_user_level"]:
-            gen_notification += (
-                f"On your user level you have {assignments["total"]} lessons ready. \n"
-            )
+            gen_notification += f"On your user level you have {assignments["total"]} lesson{plural} ready. \n"
         else:
-            gen_notification += f"You have {assignments["total"]} lessons ready. \n"
+            gen_notification += (
+                f"You have {assignments["total"]} lesson{plural} ready. \n"
+            )
 
         gen_notification += "-----\n"
 
@@ -161,7 +176,7 @@ def generate_specific_notification(assignments, task_type):
                 gen_notification += f"Vocabulary: {assignments["vocabulary"]} \n"
 
     if task_type == "review":
-        gen_notification += f"You have {assignments["total"]} reviews ready. \n"
+        gen_notification += f"You have {assignments["total"]} review{plural} ready. \n"
         gen_notification += "-----\n"
 
         if data["reviews"]["radical"]["is_checked"]:
@@ -169,27 +184,54 @@ def generate_specific_notification(assignments, task_type):
                 gen_notification += f"Radicals: {assignments["radical"]} "
                 if assignments["radical_burn"] > 0:
                     gen_notification += (
-                        f"(Ready to burn: {assignments["radical_burn"]})\n"
+                        f"(Ready to burn: {assignments["radical_burn"]}) "
                     )
-                else:
-                    gen_notification += "\n"
+                if data["reviews"]["radical"]["only_user_level"]:
+                    gen_notification += f"- only user level."
+        gen_notification += "\n"
 
         if data["reviews"]["kanji"]["is_checked"]:
             if assignments["kanji"] > 0:
                 gen_notification += f"Kanji: {assignments["kanji"]} "
                 if assignments["kanji_burn"] > 0:
-                    gen_notification += (
-                        f"(Ready to burn: {assignments["kanji_burn"]})\n"
-                    )
-                else:
-                    gen_notification += "\n"
+                    gen_notification += f"(Ready to burn: {assignments["kanji_burn"]}) "
+                if data["reviews"]["kanji"]["only_user_level"]:
+                    gen_notification += f"- only user level."
+        gen_notification += "\n"
 
         if data["reviews"]["vocabulary"]["is_checked"]:
             if assignments["vocabulary"] > 0:
                 gen_notification += f"Vocabulary: {assignments["vocabulary"]} "
                 if assignments["vocabulary_burn"] > 0:
                     gen_notification += (
-                        f"(Ready to burn: {assignments["vocabulary_burn"]})"
+                        f"(Ready to burn: {assignments["vocabulary_burn"]}) "
                     )
+                if data["reviews"]["kanji"]["only_user_level"]:
+                    gen_notification += f"- only user level."
+
+    if task_type == "future":
+        gen_notification += (
+            f"Closest {assignments["total"]} review{plural} at {assignments["time"]}.\n"
+        )
+        gen_notification += "-----\n"
+
+        if assignments["radicals"] != 0:
+            gen_notification += f"Radicals: {assignments["radicals"]} "
+            if assignments["radicals_burn"] != 0:
+                gen_notification += f"(Ready to burn: {assignments["radicals_burn"]}) "
+        gen_notification += "\n"
+
+        if assignments["kanji"] != 0:
+            gen_notification += f"Kanji: {assignments["kanji"]} "
+            if assignments["kanji_burn"] != 0:
+                gen_notification += f"(Ready to burn: {assignments["kanji_burn"]}) "
+        gen_notification += "\n"
+
+        if assignments["vocabulary"] != 0:
+            gen_notification += f"Vocabulary: {assignments["vocabulary"]} "
+            if assignments["vocabulary_burn"] != 0:
+                gen_notification += (
+                    f"(Ready to burn: {assignments["vocabulary_burn"]}) "
+                )
 
     return gen_notification
