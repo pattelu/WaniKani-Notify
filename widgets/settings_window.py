@@ -1,5 +1,7 @@
 import os
-from PySide6.QtWidgets import QWidget
+from functools import partial
+
+from PySide6.QtWidgets import QWidget, QCheckBox
 from apscheduler.schedulers.qt import QTimer
 
 from ui.ui_settings import Ui_Settings
@@ -21,7 +23,15 @@ class SettingsWindow(QWidget, Ui_Settings):
         super().__init__()
         self.setupUi(self)
 
+        # SRS buttons lists
+        self.check_srs_radicals_buttons = []
+        self.check_srs_kanji_buttons = []
+        self.check_srs_vocabulary_buttons = []
+        self.create_button_groups()
+
+        # Start on start
         self.label_info.setText("")
+        self.check_config()
 
         # Buttons
         self.btn_test.clicked.connect(self.test_api)
@@ -29,17 +39,15 @@ class SettingsWindow(QWidget, Ui_Settings):
         self.btn_quit.clicked.connect(self.quit_settings)
 
         # Additional options visibility
-        self.check_r_radicals.toggled.connect(self.widget_radicals_srs.setVisible)
-        self.check_r_kanji.toggled.connect(self.widget_kanji_srs.setVisible)
-        self.check_r_vocabulary.toggled.connect(self.widget_vocabulary_srs.setVisible)
+        self.check_r_radicals.toggled.connect(
+            partial(self.reviews_type_toggle, "radicals")
+        )
+        self.check_r_kanji.toggled.connect(partial(self.reviews_type_toggle, "kanji"))
+        self.check_r_vocabulary.toggled.connect(
+            partial(self.reviews_type_toggle, "vocabulary")
+        )
 
-        if not self.check_r_radicals.isChecked():
-            self.widget_radicals_srs.setVisible(False)
-        if not self.check_r_kanji.isChecked():
-            self.widget_kanji_srs.setVisible(False)
-        if not self.check_r_vocabulary.isChecked():
-            self.widget_vocabulary_srs.setVisible(False)
-
+    def create_button_groups(self):
         # SRS buttons lists
         self.check_srs_radicals_buttons = [
             self.check_srs_radicals_1,
@@ -72,9 +80,6 @@ class SettingsWindow(QWidget, Ui_Settings):
             self.check_srs_vocabulary_8,
         ]
 
-        # Start function on start
-        self.check_config()
-
     def test_api(self):
         self.save_settings()
         wk.get_headers()
@@ -104,6 +109,8 @@ class SettingsWindow(QWidget, Ui_Settings):
 
             # Reviews
             self.check_r_radicals.setChecked(data["reviews"]["radical"]["is_checked"])
+            if not self.check_r_radicals.isChecked():
+                self.widget_radicals_srs.setVisible(False)
             self.check_user_level_review_radicals.setChecked(
                 data["reviews"]["radical"]["only_user_level"]
             )
@@ -116,6 +123,8 @@ class SettingsWindow(QWidget, Ui_Settings):
                     getattr(self, f"check_srs_radicals_{number}").setChecked(True)
 
             self.check_r_kanji.setChecked(data["reviews"]["kanji"]["is_checked"])
+            if not self.check_r_kanji.isChecked():
+                self.widget_kanji_srs.setVisible(False)
             self.check_user_level_review_kanji.setChecked(
                 data["reviews"]["kanji"]["only_user_level"]
             )
@@ -130,6 +139,8 @@ class SettingsWindow(QWidget, Ui_Settings):
             self.check_r_vocabulary.setChecked(
                 data["reviews"]["vocabulary"]["is_checked"]
             )
+            if not self.check_r_vocabulary.isChecked():
+                self.widget_vocabulary_srs.setVisible(False)
             self.check_user_level_review_vocabulary.setChecked(
                 data["reviews"]["vocabulary"]["only_user_level"]
             )
@@ -177,6 +188,21 @@ class SettingsWindow(QWidget, Ui_Settings):
 
         self.label_info.setText(f"Settings saved")
         QTimer.singleShot(3000, lambda: self.label_info.setText(""))
+
+    def reviews_type_toggle(self, btn_type, is_checked):
+        extended_options = getattr(self, f"widget_{btn_type}_srs")
+
+        if is_checked:
+            extended_options.setVisible(True)
+        else:
+            extended_options.setVisible(False)
+            level = getattr(self, f"check_user_level_review_{btn_type}")
+            level.setChecked(False)
+
+            checkboxes = getattr(self, f"check_srs_{btn_type}_buttons")
+
+            for checkbox in checkboxes:
+                getattr(self, checkbox.objectName()).setChecked(False)
 
     def quit_settings(self):
         self.label_test_api.setText(f"")
