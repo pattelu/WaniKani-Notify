@@ -154,6 +154,9 @@ class SettingsWindow(QWidget, Ui_Settings):
 
         else:
             self.text_api.setText("Enter WaniKani API key")
+            self.widget_radicals_srs.setVisible(False)
+            self.widget_kanji_srs.setVisible(False)
+            self.widget_vocabulary_srs.setVisible(False)
 
     def save_settings(self):
         configuration = {

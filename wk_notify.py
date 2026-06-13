@@ -5,13 +5,17 @@ import json
 
 
 def check_available_items(task_type, notify_zero=False):
+    count = []
     wk.get_headers()
 
     # Requests
-    user_level = wk.get_user_level()
-    query = create_query(task_type, user_level)
-    assignments_list = wk.get_assignments(query)
-    count = wk.count_assignments(assignments_list)
+    try:
+        user_level = wk.get_user_level()
+        query = create_query(task_type, user_level)
+        assignments_list = wk.get_assignments(query)
+        count = wk.count_assignments(assignments_list)
+    except Exception as e:
+        error_notification(e)
 
     items_notification(count, task_type, notify_zero)
 
