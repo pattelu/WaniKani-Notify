@@ -1,4 +1,4 @@
-name: Build and Upload Executables
+name: Build and upload executables
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    needs: tests
     strategy:
       matrix:
         include:
