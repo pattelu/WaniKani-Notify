@@ -1,14 +1,14 @@
 name: Build and upload executables
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
+  workflow_run:
+    workflows: ["Run tests"]
+    types:
+      - completed
     branches: [ "main" ]
 
 jobs:
   build:
-    needs: tests
     strategy:
       matrix:
         include:
