@@ -24,6 +24,9 @@ jobs:
           libdbus-1-dev \
           pkg-config \
           glib-2.0
+    - uses: pyvista/setup-headless-display-action@v3
+      with:
+        qt: true
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
