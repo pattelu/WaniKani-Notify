@@ -98,7 +98,7 @@ def start_scheduler(scheduler):
 def error_notification(e):
     notification.notify(
         title=f"WaniKani Notify error!",
-        message=f"WaniKani Notify encounter error: {e}. \nCheck your configuration file.",
+        message=f"WaniKani Notify encounter error: {e}.",
         app_name="WaniKani Notify",
         timeout=10,
     )
