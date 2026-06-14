@@ -1,14 +1,54 @@
 name: Create Release
 
 on:
-  workflow_run:
-    workflows: ["Build and upload executables"]
-    types:
-      - completed
-    branches:
+  push:
+    tags:
       - "v*"
 
 jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+          - os: ubuntu-latest
+            name: linux
+          - os: macos-latest
+            name: macos
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libdbus-1-dev \
+            pkg-config \
+            glib-2.0
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Build Executable
+        run: pyinstaller main.spec
+      - name: Rename binary
+        if: matrix.name == 'linux' || matrix.name == 'macos'
+        shell: bash
+        run: mv dist/wknotify* dist/wknotify_${{ matrix.name }}
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: WaniKani-Notify_${{ matrix.name }}
+          path: dist/
+
   release:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
