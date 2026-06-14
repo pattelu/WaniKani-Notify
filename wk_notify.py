@@ -2,6 +2,8 @@ from functools import partial
 from plyer import notification
 import wk_api as wk
 import json
+from datetime import datetime, timezone, timedelta, time
+import tzlocal
 
 
 def check_available_items(task_type, notify_zero=False):
@@ -23,8 +25,64 @@ def check_available_items(task_type, notify_zero=False):
 def check_closest_review():
     user_level = wk.get_user_level()
     query = create_query("review", user_level, True)
-    reviews = wk.get_future_assignments(query)
+    reviews = future_assignments(query)
     future_notification(reviews)
+
+
+def future_assignments(query_future):
+    local_tz = tzlocal.get_localzone()
+    now_local = datetime.now(local_tz)
+    if time(0, 0) <= now_local.time() < time(3, 0):
+        limit_local = datetime.combine(now_local.date(), time(3, 0), tzinfo=local_tz)
+    else:
+        limit_local = datetime.combine(
+            now_local.date() + timedelta(days=1), time(3, 0), tzinfo=local_tz
+        )
+
+    middle_local = now_local + (limit_local - now_local) / 2
+
+    current_time = datetime.now(timezone.utc)
+    middle_utc = middle_local.astimezone(timezone.utc)
+    limit_utc = limit_local.astimezone(timezone.utc)
+
+    current_plus = current_time.replace(
+        hour=current_time.hour + 1, minute=00, second=0, microsecond=0
+    )
+    middle_utc_start = middle_utc.replace(
+        hour=middle_utc.hour + 1, minute=00, second=0, microsecond=0
+    )
+    middle_utc_end = middle_utc.replace(minute=59, second=0, microsecond=0)
+    limit_utc = limit_utc.replace(minute=59, second=0, microsecond=0)
+
+    current_plus_str = current_plus.strftime("%Y-%m-%dT%H:%M:%SZ")
+    middle_utc_end_str = middle_utc_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+    middle_utc_start_str = middle_utc_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+    limit_utc_str = limit_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    query_first_half = [
+        f"&available_after={current_plus_str}&available_before={middle_utc_end_str}"
+    ]
+    query_second_half = [
+        f"&available_after={middle_utc_start_str}&available_before={limit_utc_str}"
+    ]
+
+    if wk.get_assignments(query_first_half):
+        future_review = wk.get_future_assignments(query_future, local_tz, current_time)
+        return future_review
+    elif wk.get_assignments(query_second_half):
+        future_review = wk.get_future_assignments(query_future, local_tz, current_time)
+        return future_review
+    else:
+        no_review = {"time": 0}
+        return no_review
+
+
+# Scheduler
+def start_scheduler(scheduler):
+    scheduler.add_job(
+        partial(check_available_items, "review"), "cron", minute=00, second=10
+    )
+    scheduler.start()
 
 
 def create_query(task_type, user_level, future=False):
@@ -86,14 +144,6 @@ def create_query(task_type, user_level, future=False):
     return query_list
 
 
-# Scheduler
-def start_scheduler(scheduler):
-    scheduler.add_job(
-        partial(check_available_items, "review"), "cron", minute=00, second=10
-    )
-    scheduler.start()
-
-
 # Notifications
 def error_notification(e):
     notification.notify(
@@ -104,11 +154,11 @@ def error_notification(e):
     )
 
 
-def check_in_progress_notification(time=2):
+def check_in_progress_notification(time_limit=2):
     notification.notify(
         message=f"Checking...",
         app_name="WaniKani Notify",
-        timeout=time,
+        timeout=time_limit,
     )
 
 
@@ -219,10 +269,10 @@ def generate_specific_notification(assignments, task_type):
         )
         gen_notification += "-----\n"
 
-        if assignments["radicals"] != 0:
-            gen_notification += f"Radicals: {assignments["radicals"]} "
-            if assignments["radicals_burn"] != 0:
-                gen_notification += f"(Ready to burn: {assignments["radicals_burn"]}) "
+        if assignments["radical"] != 0:
+            gen_notification += f"Radicals: {assignments["radical"]} "
+            if assignments["radical_burn"] != 0:
+                gen_notification += f"(Ready to burn: {assignments["radical_burn"]}) "
         gen_notification += "\n"
 
         if assignments["kanji"] != 0:

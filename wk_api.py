@@ -1,10 +1,6 @@
-from datetime import datetime, timezone, timedelta, time
-
-import tzlocal
-
+from datetime import timedelta
 import requests
 import json
-
 import wk_notify as wkn
 
 headers = {}
@@ -46,12 +42,9 @@ def get_assignments(query_list):
         while assignment_request:
             try:
                 assignment_response = requests.get(assignment_request, headers=headers)
-
-                # if assignment_response.status_code == 200:
                 assignment_data = assignment_response.json()
 
                 for assignment in assignment_data["data"]:
-
                     assignment_type = assignment["data"].get("subject_type")
                     if assignment_type == "radical":
                         assignments_list.append(assignment)
@@ -115,28 +108,11 @@ def count_assignments(assignments_list):
     return assignment_items
 
 
-def get_future_assignments(query_future):
-    local_tz = tzlocal.get_localzone()
-    now_local = datetime.now(local_tz)
-    limit_local = datetime.combine(
-        now_local.date() + timedelta(days=1), time(3, 0), tzinfo=local_tz
-    )
-
-    limit_utc = limit_local.astimezone(timezone.utc)
-
-    current = datetime.now(timezone.utc)
-
-    radicals = 0
-    kanji = 0
-    vocabulary = 0
-    radicals_burn = 0
-    kanji_burn = 0
-    vocabulary_burn = 0
-
+def get_future_assignments(query_future, local_tz, current_time):
     while True:
         query_new = []
 
-        next_time = current + timedelta(hours=1)
+        next_time = current_time + timedelta(hours=1)
 
         available_after = next_time.replace(minute=0, second=0, microsecond=0)
         available_before = next_time.replace(minute=59, second=0, microsecond=0)
@@ -153,42 +129,13 @@ def get_future_assignments(query_future):
 
         future_assignment = get_assignments(query_new)
 
-        for element in future_assignment:
-            if element["data"]["subject_type"] == "radical":
-                radicals += 1
-                if element["data"]["srs_stage"] == 8:
-                    radicals_burn += 1
-            if element["data"]["subject_type"] == "kanji":
-                kanji += 1
-                if element["data"]["srs_stage"] == 8:
-                    kanji_burn += 1
-            if (
-                element["data"]["subject_type"] == "vocabulary"
-                or element["data"]["subject_type"] == "kana_vocabulary"
-            ):
-                vocabulary += 1
-                if element["data"]["srs_stage"] == 8:
-                    vocabulary_burn += 1
+        future_review = count_assignments(future_assignment)
 
-        if available_after == limit_utc:
-            no_review = {"time": 0}
-            return no_review
         if not future_assignment:
-            current = next_time
+            current_time = next_time
             continue
         else:
             local_time = available_after.astimezone(local_tz).strftime("%H:%M")
-            total = radicals + kanji + vocabulary
-
-            future_review = {
-                "time": local_time,
-                "total": total,
-                "radicals": radicals,
-                "kanji": kanji,
-                "vocabulary": vocabulary,
-                "radicals_burn": radicals_burn,
-                "kanji_burn": kanji_burn,
-                "vocabulary_burn": vocabulary_burn,
-            }
+            future_review["time"] = local_time
 
             return future_review
