@@ -1,4 +1,6 @@
 from pathlib import Path
+from unittest.mock import patch
+
 import pytest
 
 from widgets.settings_window import SettingsWindow
@@ -8,17 +10,19 @@ from widgets.tray import resource_path
 
 @pytest.fixture
 def settings(qtbot):
-    if os.path.exists("config.json"):
-        path = resource_path("config.json")
-        Path(path).unlink(missing_ok=True)
-
     window = SettingsWindow()
     qtbot.addWidget(window)
 
     yield window
 
+@pytest.fixture
+def remove_config():
+    if os.path.exists("config.json"):
+        path = resource_path("config.json")
+        Path(path).unlink(missing_ok=True)
 
-def test_default_settings(settings):
+
+def test_default_settings(remove_config, settings, ):
     assert settings.text_api.text() == "Enter WaniKani API key"
     assert settings.check_user_level_lesson.isChecked() == False
     assert settings.check_l_radicals.isChecked() == False
@@ -34,10 +38,19 @@ def test_default_settings(settings):
     assert settings.widget_vocabulary_srs.isVisible() == False
 
 
-def test_api_key_info(settings):
+def test_valid_api_key(settings):
+    with patch('requests.get') as mock_get:
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {"data": {"level": 20}}
 
-    # Valid key env (?) / example response
+        settings.btn_test.click()
 
+        mock_get.assert_called_once()
+
+        assert settings.label_test_api.text() == f"Your user level is 20. API key is valid. "
+
+
+def test_invalid_api_key(settings):
     settings.text_api.setText("invalid-api")
     settings.btn_test.click()
 

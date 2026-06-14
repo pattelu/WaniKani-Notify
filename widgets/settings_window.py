@@ -30,6 +30,7 @@ class SettingsWindow(QWidget, Ui_Settings):
         self.create_button_groups()
 
         # Start on start
+        self.label_test_api.setText("")
         self.label_info.setText("")
         self.check_config()
 
