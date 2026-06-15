@@ -32,14 +32,14 @@ def check_closest_review():
 def future_assignments(query_future):
     local_tz = tzlocal.get_localzone()
     now_local = datetime.now(local_tz)
-    if time(0, 0) <= now_local.time() < time(3, 0):
+    if now_local.time() < time(3, 0):
         limit_local = datetime.combine(now_local.date(), time(3, 0), tzinfo=local_tz)
+        middle_local = limit_local
     else:
         limit_local = datetime.combine(
             now_local.date() + timedelta(days=1), time(3, 0), tzinfo=local_tz
         )
-
-    middle_local = now_local + (limit_local - now_local) / 2
+        middle_local = now_local + (limit_local - now_local) / 2
 
     current_time = datetime.now(timezone.utc)
     middle_utc = middle_local.astimezone(timezone.utc)
@@ -48,9 +48,16 @@ def future_assignments(query_future):
     current_plus = current_time.replace(
         hour=current_time.hour + 1, minute=00, second=0, microsecond=0
     )
-    middle_utc_start = middle_utc.replace(
-        hour=middle_utc.hour + 1, minute=00, second=0, microsecond=0
-    )
+
+    if middle_utc.hour == 23:
+        middle_utc_start = middle_utc.replace(
+            day=middle_utc.day + 1, hour=0, minute=00, second=0, microsecond=0
+        )
+    else:
+        middle_utc_start = middle_utc.replace(
+            hour=middle_utc.hour + 1, minute=00, second=0, microsecond=0
+        )
+
     middle_utc_end = middle_utc.replace(minute=59, second=0, microsecond=0)
     limit_utc = limit_utc.replace(minute=59, second=0, microsecond=0)
 
@@ -69,7 +76,7 @@ def future_assignments(query_future):
     if wk.get_assignments(query_first_half):
         future_review = wk.get_future_assignments(query_future, local_tz, current_time)
         return future_review
-    elif wk.get_assignments(query_second_half):
+    elif middle_local != limit_local and wk.get_assignments(query_second_half):
         future_review = wk.get_future_assignments(query_future, local_tz, current_time)
         return future_review
     else:
