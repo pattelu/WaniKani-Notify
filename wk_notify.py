@@ -263,6 +263,12 @@ def generate_specific_notification(assignments, task_type):
                 if data["reviews"]["vocabulary"]["only_user_level"]:
                     gen_notification += f"- only user level."
 
+        gen_notification += "\n-----\n"
+        for key, value in assignments["srs_stage"].items():
+            if value != 0:
+                gen_notification += f"{key}: {value}, "
+        gen_notification = gen_notification.strip(", ")
+
     if task_type == "future":
         gen_notification += (
             f"Closest {assignments["total"]} review{plural} at {assignments["time"]}.\n"

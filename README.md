@@ -14,12 +14,12 @@
 
 ### What does it do?
 - The app will show a notification when new reviews are ready for you.
-- You can also manually check whether reviews or lessons are available, and see the time of the next review.
+- You can also manually check whether reviews or lessons are available, and see the time of the next reviews.
 - In the settings, you can customize notifications.
 
 It's recommended to run the app at system startup so you don't miss anything!
 
-### How it looks?
+### How it looks? (Linux)
 Notifications: </br>
 <div style="padding-left: 50px">
 <img src="https://github.com/pattelu/WaniKani-Notify/blob/main/img/lessons_ss.png?raw=true" alt="lessons notification" /></br>

@@ -1,4 +1,6 @@
 from datetime import timedelta
+from doctest import master
+
 import requests
 import json
 import wk_notify as wkn
@@ -75,6 +77,14 @@ def count_assignments(assignments_list):
     radical_burn = 0
     kanji_burn = 0
     vocabulary_burn = 0
+    apprentice_1 = 0
+    apprentice_2 = 0
+    apprentice_3 = 0
+    apprentice_4 = 0
+    guru_1 = 0
+    guru_2 = 0
+    master_s = 0
+    enlightened = 0
 
     for assignment in assignments_list:
         if assignment["data"]["subject_type"] == "radical":
@@ -93,6 +103,23 @@ def count_assignments(assignments_list):
             if assignment["data"]["srs_stage"] == 8:
                 vocabulary_burn += 1
 
+        if assignment["data"]["srs_stage"] == 1:
+            apprentice_1 += 1
+        if assignment["data"]["srs_stage"] == 2:
+            apprentice_2 += 1
+        if assignment["data"]["srs_stage"] == 3:
+            apprentice_3 += 1
+        if assignment["data"]["srs_stage"] == 4:
+            apprentice_4 += 1
+        if assignment["data"]["srs_stage"] == 5:
+            guru_1 += 1
+        if assignment["data"]["srs_stage"] == 6:
+            guru_1 += 1
+        if assignment["data"]["srs_stage"] == 7:
+            master_s += 1
+        if assignment["data"]["srs_stage"] == 8:
+            enlightened += 1
+
     total = radical + kanji + vocabulary
 
     assignment_items = {
@@ -103,6 +130,16 @@ def count_assignments(assignments_list):
         "kanji_burn": kanji_burn,
         "vocabulary_burn": vocabulary_burn,
         "total": total,
+        "srs_stage": {
+            "A1": apprentice_1,
+            "A2": apprentice_2,
+            "A3": apprentice_3,
+            "A4": apprentice_4,
+            "G1": guru_1,
+            "G2": guru_2,
+            "M": master_s,
+            "E": enlightened,
+        },
     }
 
     return assignment_items
