@@ -12,8 +12,10 @@ from widgets.tray import resource_path
 def settings(qtbot):
     window = SettingsWindow()
     qtbot.addWidget(window)
+    window.show()
 
     yield window
+
 
 @pytest.fixture
 def remove_config():
@@ -22,7 +24,10 @@ def remove_config():
         Path(path).unlink(missing_ok=True)
 
 
-def test_default_settings(remove_config, settings, ):
+def test_default_settings(
+    remove_config,
+    settings,
+):
     assert settings.text_api.text() == "Enter WaniKani API key"
     assert settings.check_user_level_lesson.isChecked() == False
     assert settings.check_l_radicals.isChecked() == False
@@ -39,7 +44,7 @@ def test_default_settings(remove_config, settings, ):
 
 
 def test_valid_api_key(settings):
-    with patch('requests.get') as mock_get:
+    with patch("requests.get") as mock_get:
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {"data": {"level": 20}}
 
@@ -47,7 +52,10 @@ def test_valid_api_key(settings):
 
         mock_get.assert_called_once()
 
-        assert settings.label_test_api.text() == f"Your user level is 20. API key is valid. "
+        assert (
+            settings.label_test_api.text()
+            == f"Your user level is 20. API key is valid. "
+        )
 
 
 def test_invalid_api_key(settings):
@@ -59,20 +67,49 @@ def test_invalid_api_key(settings):
 
 
 def test_checkbox_dependencies(settings):
-    pass
+    settings.check_r_kanji.setChecked(True)
+    settings.check_r_radicals.setChecked(True)
+    settings.check_r_vocabulary.setChecked(True)
+
+    assert settings.widget_radicals_srs.isVisible() == True
+    assert settings.widget_kanji_srs.isVisible() == True
+    assert settings.widget_vocabulary_srs.isVisible() == True
 
 
-def test_save_settings(settings):
-
-    #
-    # Add
-    # More
-    #
+def test_save_settings(remove_config, settings):
+    settings.check_user_level_lesson.setChecked(True)
+    settings.check_l_kanji.setChecked(True)
+    settings.check_r_radicals.setChecked(True)
+    if settings.widget_radicals_srs.isVisible():
+        settings.check_srs_radicals_1.setChecked(True)
+    settings.check_r_vocabulary.setChecked(True)
+    if settings.widget_vocabulary_srs.isVisible():
+        settings.check_srs_vocabulary_4.setChecked(True)
+        settings.check_srs_vocabulary_8.setChecked(True)
 
     settings.btn_save.click()
-
     assert settings.label_info.text() == "Settings saved"
 
+    settings.btn_quit.click()
+    settings.show()
 
-def test_quit_without_saving(settings):
-    pass
+    assert settings.check_user_level_lesson.isChecked()
+    assert settings.check_l_kanji.isChecked()
+    assert settings.check_r_radicals.isChecked()
+    assert settings.check_srs_radicals_1.isChecked()
+    assert settings.check_r_vocabulary.isChecked()
+    assert settings.check_srs_vocabulary_4.isChecked()
+    assert settings.check_srs_vocabulary_8.isChecked()
+
+
+def test_quit_without_saving(remove_config, settings, qtbot):
+    settings.check_user_level_lesson.setChecked(True)
+    settings.check_l_kanji.setChecked(True)
+
+    settings.btn_quit.click()
+    settings.deleteLater()
+
+    settings = SettingsWindow()
+
+    assert settings.check_user_level_lesson.isChecked() == False
+    assert settings.check_l_kanji.isChecked() == False
