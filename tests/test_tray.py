@@ -7,6 +7,7 @@ from widgets.tray import Tray
 def tray_check(qtbot):
     with patch("widgets.tray.user_check") as mock_user_check:
         tray = Tray(None, None)
+        tray.show()
 
         yield tray, mock_user_check
 
@@ -14,6 +15,7 @@ def tray_check(qtbot):
 @pytest.fixture
 def tray_basic(qtbot):
     tray = Tray(None, None)
+    tray.show()
 
     yield tray
 
