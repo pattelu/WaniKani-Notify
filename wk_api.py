@@ -114,7 +114,7 @@ def count_assignments(assignments_list):
         if assignment["data"]["srs_stage"] == 5:
             guru_1 += 1
         if assignment["data"]["srs_stage"] == 6:
-            guru_1 += 1
+            guru_2 += 1
         if assignment["data"]["srs_stage"] == 7:
             master_s += 1
         if assignment["data"]["srs_stage"] == 8:
