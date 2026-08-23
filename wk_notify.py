@@ -103,10 +103,12 @@ def create_query(task_type, user_level, future=False):
 
         if data["lessons"]["only_user_level"]:
             query += f"&levels={user_level}"
+        elif data["lessons"]["is_specific_selected"]:
+            query += f"&levels={data["lessons"]["specific_levels"]}"
 
         query += "&subject_types="
         items = list(data["lessons"].items())
-        for key, value in items[:-1]:
+        for key, value in items[:3]:
             if value:
                 query += f"{key},"
 
@@ -131,6 +133,8 @@ def create_query(task_type, user_level, future=False):
                 )
                 if data["reviews"]["radical"]["only_user_level"]:
                     query += f"&levels={user_level}"
+                elif data["reviews"]["radical"]["is_specific_selected"]:
+                    query += f"&levels={data["reviews"]["radical"]["specific_levels"]}"
                 query_list.append(query)
             if item == "kanji":
                 query = (
@@ -138,6 +142,8 @@ def create_query(task_type, user_level, future=False):
                 )
                 if data["reviews"]["kanji"]["only_user_level"]:
                     query += f"&levels={user_level}"
+                elif data["reviews"]["kanji"]["is_specific_selected"]:
+                    query += f"&levels={data["reviews"]["kanji"]["specific_levels"]}"
                 query_list.append(query)
             if item == "vocabulary":
                 query = (
@@ -146,8 +152,11 @@ def create_query(task_type, user_level, future=False):
                 )
                 if data["reviews"]["vocabulary"]["only_user_level"]:
                     query += f"&levels={user_level}"
+                elif data["reviews"]["vocabulary"]["is_specific_selected"]:
+                    query += f"&levels={data["reviews"]["vocabulary"]["specific_levels"]}"
                 query_list.append(query)
 
+    print(query_list)
     return query_list
 
 

@@ -17,20 +17,20 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QGridLayout,
     QHBoxLayout, QLabel, QLayout, QLineEdit,
-    QPushButton, QSizePolicy, QSpacerItem, QVBoxLayout,
-    QWidget)
+    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
+    QVBoxLayout, QWidget)
 
 class Ui_Settings(object):
     def setupUi(self, Settings):
         if not Settings.objectName():
             Settings.setObjectName(u"Settings")
-        Settings.resize(593, 480)
+        Settings.resize(686, 568)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Settings.sizePolicy().hasHeightForWidth())
         Settings.setSizePolicy(sizePolicy)
-        Settings.setMaximumSize(QSize(595, 480))
+        Settings.setMaximumSize(QSize(700, 700))
         icon = QIcon()
         icon.addFile(u"../img/icon.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         Settings.setWindowIcon(icon)
@@ -128,12 +128,32 @@ class Ui_Settings(object):
         self.verticalLayout_5.setSpacing(0)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.verticalLayout_5.setContentsMargins(10, -1, -1, -1)
-        self.check_user_level_lesson = QCheckBox(Settings)
-        self.check_user_level_lesson.setObjectName(u"check_user_level_lesson")
-        sizePolicy3.setHeightForWidth(self.check_user_level_lesson.sizePolicy().hasHeightForWidth())
-        self.check_user_level_lesson.setSizePolicy(sizePolicy3)
+        self.horizontalLayout_15 = QHBoxLayout()
+        self.horizontalLayout_15.setSpacing(6)
+        self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
+        self.radio_all_level_lesson = QRadioButton(Settings)
+        self.radio_all_level_lesson.setObjectName(u"radio_all_level_lesson")
+        self.radio_all_level_lesson.setChecked(True)
 
-        self.verticalLayout_5.addWidget(self.check_user_level_lesson)
+        self.horizontalLayout_15.addWidget(self.radio_all_level_lesson)
+
+        self.radio_user_level_lesson = QRadioButton(Settings)
+        self.radio_user_level_lesson.setObjectName(u"radio_user_level_lesson")
+
+        self.horizontalLayout_15.addWidget(self.radio_user_level_lesson)
+
+        self.radio_specific_level_lesson = QRadioButton(Settings)
+        self.radio_specific_level_lesson.setObjectName(u"radio_specific_level_lesson")
+
+        self.horizontalLayout_15.addWidget(self.radio_specific_level_lesson)
+
+        self.line_specific_level_lessons = QLineEdit(Settings)
+        self.line_specific_level_lessons.setObjectName(u"line_specific_level_lessons")
+
+        self.horizontalLayout_15.addWidget(self.line_specific_level_lessons)
+
+
+        self.verticalLayout_5.addLayout(self.horizontalLayout_15)
 
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
@@ -220,10 +240,32 @@ class Ui_Settings(object):
         self.verticalLayout_7 = QVBoxLayout()
         self.verticalLayout_7.setSpacing(0)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.check_user_level_review_radicals = QCheckBox(self.widget_radicals_srs)
-        self.check_user_level_review_radicals.setObjectName(u"check_user_level_review_radicals")
+        self.horizontalLayout_12 = QHBoxLayout()
+        self.horizontalLayout_12.setSpacing(6)
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.radio_all_level_radicals = QRadioButton(self.widget_radicals_srs)
+        self.radio_all_level_radicals.setObjectName(u"radio_all_level_radicals")
+        self.radio_all_level_radicals.setChecked(True)
 
-        self.verticalLayout_7.addWidget(self.check_user_level_review_radicals)
+        self.horizontalLayout_12.addWidget(self.radio_all_level_radicals)
+
+        self.radio_user_level_review_radicals = QRadioButton(self.widget_radicals_srs)
+        self.radio_user_level_review_radicals.setObjectName(u"radio_user_level_review_radicals")
+
+        self.horizontalLayout_12.addWidget(self.radio_user_level_review_radicals)
+
+        self.radio_specific_level_radicals = QRadioButton(self.widget_radicals_srs)
+        self.radio_specific_level_radicals.setObjectName(u"radio_specific_level_radicals")
+
+        self.horizontalLayout_12.addWidget(self.radio_specific_level_radicals)
+
+        self.line_specific_level_radicals = QLineEdit(self.widget_radicals_srs)
+        self.line_specific_level_radicals.setObjectName(u"line_specific_level_radicals")
+
+        self.horizontalLayout_12.addWidget(self.line_specific_level_radicals)
+
+
+        self.verticalLayout_7.addLayout(self.horizontalLayout_12)
 
         self.gridLayout = QGridLayout()
         self.gridLayout.setSpacing(0)
@@ -239,6 +281,16 @@ class Ui_Settings(object):
 
         self.gridLayout.addWidget(self.check_srs_radicals_1, 0, 1, 1, 1)
 
+        self.check_srs_radicals_8 = QCheckBox(self.widget_radicals_srs)
+        self.check_srs_radicals_8.setObjectName(u"check_srs_radicals_8")
+
+        self.gridLayout.addWidget(self.check_srs_radicals_8, 1, 4, 1, 1)
+
+        self.check_srs_radicals_6 = QCheckBox(self.widget_radicals_srs)
+        self.check_srs_radicals_6.setObjectName(u"check_srs_radicals_6")
+
+        self.gridLayout.addWidget(self.check_srs_radicals_6, 1, 2, 1, 1)
+
         self.check_srs_radicals_2 = QCheckBox(self.widget_radicals_srs)
         self.check_srs_radicals_2.setObjectName(u"check_srs_radicals_2")
 
@@ -249,25 +301,15 @@ class Ui_Settings(object):
 
         self.gridLayout.addWidget(self.check_srs_radicals_5, 1, 1, 1, 1)
 
-        self.check_srs_radicals_6 = QCheckBox(self.widget_radicals_srs)
-        self.check_srs_radicals_6.setObjectName(u"check_srs_radicals_6")
+        self.check_srs_radicals_3 = QCheckBox(self.widget_radicals_srs)
+        self.check_srs_radicals_3.setObjectName(u"check_srs_radicals_3")
 
-        self.gridLayout.addWidget(self.check_srs_radicals_6, 1, 2, 1, 1)
-
-        self.check_srs_radicals_8 = QCheckBox(self.widget_radicals_srs)
-        self.check_srs_radicals_8.setObjectName(u"check_srs_radicals_8")
-
-        self.gridLayout.addWidget(self.check_srs_radicals_8, 1, 4, 1, 1)
+        self.gridLayout.addWidget(self.check_srs_radicals_3, 0, 3, 1, 1)
 
         self.check_srs_radicals_7 = QCheckBox(self.widget_radicals_srs)
         self.check_srs_radicals_7.setObjectName(u"check_srs_radicals_7")
 
         self.gridLayout.addWidget(self.check_srs_radicals_7, 1, 3, 1, 1)
-
-        self.check_srs_radicals_3 = QCheckBox(self.widget_radicals_srs)
-        self.check_srs_radicals_3.setObjectName(u"check_srs_radicals_3")
-
-        self.gridLayout.addWidget(self.check_srs_radicals_3, 0, 3, 1, 1)
 
         self.check_srs_radicals_4 = QCheckBox(self.widget_radicals_srs)
         self.check_srs_radicals_4.setObjectName(u"check_srs_radicals_4")
@@ -321,10 +363,31 @@ class Ui_Settings(object):
         self.verticalLayout_8 = QVBoxLayout()
         self.verticalLayout_8.setSpacing(0)
         self.verticalLayout_8.setObjectName(u"verticalLayout_8")
-        self.check_user_level_review_kanji = QCheckBox(self.widget_kanji_srs)
-        self.check_user_level_review_kanji.setObjectName(u"check_user_level_review_kanji")
+        self.horizontalLayout_14 = QHBoxLayout()
+        self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
+        self.radio_all_level_kanji = QRadioButton(self.widget_kanji_srs)
+        self.radio_all_level_kanji.setObjectName(u"radio_all_level_kanji")
+        self.radio_all_level_kanji.setChecked(True)
 
-        self.verticalLayout_8.addWidget(self.check_user_level_review_kanji)
+        self.horizontalLayout_14.addWidget(self.radio_all_level_kanji)
+
+        self.radio_user_level_review_kanji = QRadioButton(self.widget_kanji_srs)
+        self.radio_user_level_review_kanji.setObjectName(u"radio_user_level_review_kanji")
+
+        self.horizontalLayout_14.addWidget(self.radio_user_level_review_kanji)
+
+        self.radio_specific_level_kanji = QRadioButton(self.widget_kanji_srs)
+        self.radio_specific_level_kanji.setObjectName(u"radio_specific_level_kanji")
+
+        self.horizontalLayout_14.addWidget(self.radio_specific_level_kanji)
+
+        self.line_specific_level_kanji = QLineEdit(self.widget_kanji_srs)
+        self.line_specific_level_kanji.setObjectName(u"line_specific_level_kanji")
+
+        self.horizontalLayout_14.addWidget(self.line_specific_level_kanji)
+
+
+        self.verticalLayout_8.addLayout(self.horizontalLayout_14)
 
         self.gridLayout_2 = QGridLayout()
         self.gridLayout_2.setSpacing(0)
@@ -416,12 +479,31 @@ class Ui_Settings(object):
         self.verticalLayout_10 = QVBoxLayout()
         self.verticalLayout_10.setSpacing(0)
         self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.check_user_level_review_vocabulary = QCheckBox(self.widget_vocabulary_srs)
-        self.check_user_level_review_vocabulary.setObjectName(u"check_user_level_review_vocabulary")
-        sizePolicy7.setHeightForWidth(self.check_user_level_review_vocabulary.sizePolicy().hasHeightForWidth())
-        self.check_user_level_review_vocabulary.setSizePolicy(sizePolicy7)
+        self.horizontalLayout_13 = QHBoxLayout()
+        self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
+        self.radio_all_level_vocabulary = QRadioButton(self.widget_vocabulary_srs)
+        self.radio_all_level_vocabulary.setObjectName(u"radio_all_level_vocabulary")
+        self.radio_all_level_vocabulary.setChecked(True)
 
-        self.verticalLayout_10.addWidget(self.check_user_level_review_vocabulary)
+        self.horizontalLayout_13.addWidget(self.radio_all_level_vocabulary)
+
+        self.radio_user_level_review_vocabulary = QRadioButton(self.widget_vocabulary_srs)
+        self.radio_user_level_review_vocabulary.setObjectName(u"radio_user_level_review_vocabulary")
+
+        self.horizontalLayout_13.addWidget(self.radio_user_level_review_vocabulary)
+
+        self.radio_specific_level_vocabulary = QRadioButton(self.widget_vocabulary_srs)
+        self.radio_specific_level_vocabulary.setObjectName(u"radio_specific_level_vocabulary")
+
+        self.horizontalLayout_13.addWidget(self.radio_specific_level_vocabulary)
+
+        self.line_specific_level_vocabulary = QLineEdit(self.widget_vocabulary_srs)
+        self.line_specific_level_vocabulary.setObjectName(u"line_specific_level_vocabulary")
+
+        self.horizontalLayout_13.addWidget(self.line_specific_level_vocabulary)
+
+
+        self.verticalLayout_10.addLayout(self.horizontalLayout_13)
 
         self.gridLayout_3 = QGridLayout()
         self.gridLayout_3.setSpacing(0)
@@ -538,27 +620,39 @@ class Ui_Settings(object):
     def retranslateUi(self, Settings):
         Settings.setWindowTitle(QCoreApplication.translate("Settings", u"Settings - WaniKani Notify ", None))
         self.label_api.setText(QCoreApplication.translate("Settings", u"WaniKani API key", None))
+        self.text_api.setInputMask("")
+        self.text_api.setText("")
+        self.text_api.setPlaceholderText(QCoreApplication.translate("Settings", u"Enter WaniKani API key", None))
         self.btn_test.setText(QCoreApplication.translate("Settings", u"Test API Key", None))
         self.label_test_api.setText("")
         self.label_notification.setText(QCoreApplication.translate("Settings", u"Notification settings", None))
         self.label_lessons.setText(QCoreApplication.translate("Settings", u"Lessons", None))
-        self.check_user_level_lesson.setText(QCoreApplication.translate("Settings", u"Only current user level", None))
+        self.radio_all_level_lesson.setText(QCoreApplication.translate("Settings", u"All levels", None))
+        self.radio_user_level_lesson.setText(QCoreApplication.translate("Settings", u"Only user level", None))
+        self.radio_specific_level_lesson.setText(QCoreApplication.translate("Settings", u"Specific level(s)", None))
+        self.line_specific_level_lessons.setPlaceholderText(QCoreApplication.translate("Settings", u"1,2,3", None))
         self.check_l_radicals.setText(QCoreApplication.translate("Settings", u"Radicals", None))
         self.check_l_kanji.setText(QCoreApplication.translate("Settings", u"Kanji", None))
         self.check_l_vocabulary.setText(QCoreApplication.translate("Settings", u"Vocabulary", None))
         self.label_reviews.setText(QCoreApplication.translate("Settings", u"Reviews", None))
         self.check_r_radicals.setText(QCoreApplication.translate("Settings", u"Radicals", None))
-        self.check_user_level_review_radicals.setText(QCoreApplication.translate("Settings", u"Only current user level", None))
+        self.radio_all_level_radicals.setText(QCoreApplication.translate("Settings", u"All levels", None))
+        self.radio_user_level_review_radicals.setText(QCoreApplication.translate("Settings", u"Only user level", None))
+        self.radio_specific_level_radicals.setText(QCoreApplication.translate("Settings", u"Specific level(s)", None))
+        self.line_specific_level_radicals.setPlaceholderText(QCoreApplication.translate("Settings", u"1,2,3", None))
         self.check_srs_radicals_1.setText(QCoreApplication.translate("Settings", u"Apprentice I", None))
+        self.check_srs_radicals_8.setText(QCoreApplication.translate("Settings", u"Enlightened", None))
+        self.check_srs_radicals_6.setText(QCoreApplication.translate("Settings", u"Guru II", None))
         self.check_srs_radicals_2.setText(QCoreApplication.translate("Settings", u"Apprentice II", None))
         self.check_srs_radicals_5.setText(QCoreApplication.translate("Settings", u"Guru I", None))
-        self.check_srs_radicals_6.setText(QCoreApplication.translate("Settings", u"Guru II", None))
-        self.check_srs_radicals_8.setText(QCoreApplication.translate("Settings", u"Enlightened", None))
-        self.check_srs_radicals_7.setText(QCoreApplication.translate("Settings", u"Master", None))
         self.check_srs_radicals_3.setText(QCoreApplication.translate("Settings", u"Apprentice III", None))
+        self.check_srs_radicals_7.setText(QCoreApplication.translate("Settings", u"Master", None))
         self.check_srs_radicals_4.setText(QCoreApplication.translate("Settings", u"Apprentice IV", None))
         self.check_r_kanji.setText(QCoreApplication.translate("Settings", u"Kanji", None))
-        self.check_user_level_review_kanji.setText(QCoreApplication.translate("Settings", u"Only current user level", None))
+        self.radio_all_level_kanji.setText(QCoreApplication.translate("Settings", u"All levels", None))
+        self.radio_user_level_review_kanji.setText(QCoreApplication.translate("Settings", u"Only current user level", None))
+        self.radio_specific_level_kanji.setText(QCoreApplication.translate("Settings", u"Specific level(s)", None))
+        self.line_specific_level_kanji.setPlaceholderText(QCoreApplication.translate("Settings", u"1,2,3", None))
         self.check_srs_kanji_3.setText(QCoreApplication.translate("Settings", u"Apprentice III", None))
         self.check_srs_kanji_6.setText(QCoreApplication.translate("Settings", u"Guru II", None))
         self.check_srs_kanji_4.setText(QCoreApplication.translate("Settings", u"Apprentice IV", None))
@@ -568,7 +662,10 @@ class Ui_Settings(object):
         self.check_srs_kanji_7.setText(QCoreApplication.translate("Settings", u"Master", None))
         self.check_srs_kanji_2.setText(QCoreApplication.translate("Settings", u"Apprentice II", None))
         self.check_r_vocabulary.setText(QCoreApplication.translate("Settings", u"Vocabulary", None))
-        self.check_user_level_review_vocabulary.setText(QCoreApplication.translate("Settings", u"Only current user level", None))
+        self.radio_all_level_vocabulary.setText(QCoreApplication.translate("Settings", u"All levels", None))
+        self.radio_user_level_review_vocabulary.setText(QCoreApplication.translate("Settings", u"Only user level", None))
+        self.radio_specific_level_vocabulary.setText(QCoreApplication.translate("Settings", u"Specific level(s)", None))
+        self.line_specific_level_vocabulary.setPlaceholderText(QCoreApplication.translate("Settings", u"1,2,3", None))
         self.check_srs_vocabulary_2.setText(QCoreApplication.translate("Settings", u"Apprentice II", None))
         self.check_srs_vocabulary_1.setText(QCoreApplication.translate("Settings", u"Apprentice I", None))
         self.check_srs_vocabulary_3.setText(QCoreApplication.translate("Settings", u"Apprentice III", None))

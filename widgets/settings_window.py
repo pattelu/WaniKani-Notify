@@ -15,7 +15,15 @@ def gen_srs_stages(buttons):
         if stages.isChecked():
             srs_stages += f"{number},"
 
+    srs_stages.rstrip(",")
+
     return srs_stages
+
+
+def gen_levels(levels):
+    levels.strip(",").replace(" ", "")
+
+    return levels
 
 
 class SettingsWindow(QWidget, Ui_Settings):
@@ -29,7 +37,7 @@ class SettingsWindow(QWidget, Ui_Settings):
         self.check_srs_vocabulary_buttons = []
         self.create_button_groups()
 
-        # Start on start
+        # State on start
         self.label_test_api.setText("")
         self.label_info.setText("")
         self.check_config()
@@ -38,6 +46,7 @@ class SettingsWindow(QWidget, Ui_Settings):
         self.btn_test.clicked.connect(self.test_api)
         self.btn_save.clicked.connect(self.save_settings)
         self.btn_quit.clicked.connect(self.quit_settings)
+
 
         # Additional options visibility
         self.check_r_radicals.toggled.connect(
@@ -97,43 +106,48 @@ class SettingsWindow(QWidget, Ui_Settings):
             with open("config.json", "r") as file:
                 data = json.load(file)
 
-            if str(data["wk_api_key"]) == "":
-                self.text_api.setText("Enter WaniKani API key")
-            else:
+            if not str(data["wk_api_key"]) == "":
                 self.text_api.setText(f"{data["wk_api_key"]}")
 
             # Lessons
             self.check_l_radicals.setChecked(data["lessons"]["radical"])
             self.check_l_kanji.setChecked(data["lessons"]["kanji"])
             self.check_l_vocabulary.setChecked(data["lessons"]["vocabulary"])
-            self.check_user_level_lesson.setChecked(data["lessons"]["only_user_level"])
+            self.radio_user_level_lesson.setChecked(data["lessons"]["only_user_level"])
+            self.radio_specific_level_lesson.setChecked(data["lessons"]["is_specific_selected"])
+            print(f"{data["lessons"]["specific_levels"]}")
+            self.line_specific_level_lessons.setText(f"{data["lessons"]["specific_levels"]}")
 
             # Reviews
             self.check_r_radicals.setChecked(data["reviews"]["radical"]["is_checked"])
             if not self.check_r_radicals.isChecked():
                 self.widget_radicals_srs.setVisible(False)
-            self.check_user_level_review_radicals.setChecked(
+            self.radio_user_level_review_radicals.setChecked(
                 data["reviews"]["radical"]["only_user_level"]
             )
+            self.radio_specific_level_radicals.setChecked(data["reviews"]["radical"]["is_specific_selected"])
+            self.line_specific_level_radicals.setText(f"{data["reviews"]["radical"]["specific_levels"]}")
             for button in self.check_srs_radicals_buttons:
                 getattr(self, button.objectName()).setChecked(False)
             if data["reviews"]["radical"]["srs_stages"] != "":
                 for number in (
-                    data["reviews"]["radical"]["srs_stages"].strip(",").split(",")
+                        data["reviews"]["radical"]["srs_stages"].strip(",").split(",")
                 ):
                     getattr(self, f"check_srs_radicals_{number}").setChecked(True)
 
             self.check_r_kanji.setChecked(data["reviews"]["kanji"]["is_checked"])
             if not self.check_r_kanji.isChecked():
                 self.widget_kanji_srs.setVisible(False)
-            self.check_user_level_review_kanji.setChecked(
+            self.radio_user_level_review_kanji.setChecked(
                 data["reviews"]["kanji"]["only_user_level"]
             )
+            self.radio_specific_level_kanji.setChecked(data["reviews"]["kanji"]["is_specific_selected"])
+            self.line_specific_level_kanji.setText(f"{data["reviews"]["kanji"]["specific_levels"]}")
             for button in self.check_srs_kanji_buttons:
                 getattr(self, button.objectName()).setChecked(False)
             if data["reviews"]["kanji"]["srs_stages"] != "":
                 for number in (
-                    data["reviews"]["kanji"]["srs_stages"].strip(",").split(",")
+                        data["reviews"]["kanji"]["srs_stages"].strip(",").split(",")
                 ):
                     getattr(self, f"check_srs_kanji_{number}").setChecked(True)
 
@@ -142,51 +156,61 @@ class SettingsWindow(QWidget, Ui_Settings):
             )
             if not self.check_r_vocabulary.isChecked():
                 self.widget_vocabulary_srs.setVisible(False)
-            self.check_user_level_review_vocabulary.setChecked(
+            self.radio_user_level_review_vocabulary.setChecked(
                 data["reviews"]["vocabulary"]["only_user_level"]
             )
+            self.radio_specific_level_vocabulary.setChecked(data["reviews"]["vocabulary"]["is_specific_selected"])
+            self.line_specific_level_vocabulary.setText(f"{data["reviews"]["vocabulary"]["specific_levels"]}")
             for button in self.check_srs_vocabulary_buttons:
                 getattr(self, button.objectName()).setChecked(False)
             if data["reviews"]["vocabulary"]["srs_stages"] != "":
                 for number in (
-                    data["reviews"]["vocabulary"]["srs_stages"].strip(",").split(",")
+                        data["reviews"]["vocabulary"]["srs_stages"].strip(",").split(",")
                 ):
                     getattr(self, f"check_srs_vocabulary_{number}").setChecked(True)
 
         else:
-            self.text_api.setText("Enter WaniKani API key")
+            # self.text_api.setText("Enter WaniKani API key")
             self.widget_radicals_srs.setVisible(False)
             self.widget_kanji_srs.setVisible(False)
             self.widget_vocabulary_srs.setVisible(False)
 
     def save_settings(self):
+
         configuration = {
             "wk_api_key": f"{self.text_api.text()}",
             "lessons": {
                 "radical": self.check_l_radicals.isChecked(),
                 "kanji": self.check_l_kanji.isChecked(),
                 "vocabulary": self.check_l_vocabulary.isChecked(),
-                "only_user_level": self.check_user_level_lesson.isChecked(),
+                "only_user_level": self.radio_user_level_lesson.isChecked(),
+                "is_specific_selected": self.radio_specific_level_lesson.isChecked(),
+                "specific_levels": gen_levels(self.line_specific_level_lessons.text()),
             },
             "reviews": {
                 "radical": {
                     "is_checked": self.check_r_radicals.isChecked(),
-                    "only_user_level": self.check_user_level_review_radicals.isChecked(),
+                    "only_user_level": self.radio_user_level_review_radicals.isChecked(),
+                    "is_specific_selected": self.radio_specific_level_kanji.isChecked(),
+                    "specific_levels": gen_levels(self.line_specific_level_radicals.text()),
                     "srs_stages": gen_srs_stages(self.check_srs_radicals_buttons),
                 },
                 "kanji": {
                     "is_checked": self.check_r_kanji.isChecked(),
-                    "only_user_level": self.check_user_level_review_kanji.isChecked(),
+                    "only_user_level": self.radio_user_level_review_kanji.isChecked(),
+                    "is_specific_selected": self.radio_specific_level_kanji.isChecked(),
+                    "specific_levels": gen_levels(self.line_specific_level_kanji.text()),
                     "srs_stages": gen_srs_stages(self.check_srs_kanji_buttons),
                 },
                 "vocabulary": {
                     "is_checked": self.check_r_vocabulary.isChecked(),
-                    "only_user_level": self.check_user_level_review_vocabulary.isChecked(),
+                    "only_user_level": self.radio_user_level_review_vocabulary.isChecked(),
+                    "is_specific_selected": self.radio_specific_level_vocabulary.isChecked(),
+                    "specific_levels": gen_levels(self.line_specific_level_vocabulary.text()),
                     "srs_stages": gen_srs_stages(self.check_srs_vocabulary_buttons),
                 },
             },
         }
-
         with open("config.json", "w") as file:
             json.dump(configuration, file, indent=4)
 
@@ -200,7 +224,7 @@ class SettingsWindow(QWidget, Ui_Settings):
             extended_options.setVisible(True)
         else:
             extended_options.setVisible(False)
-            level = getattr(self, f"check_user_level_review_{btn_type}")
+            level = getattr(self, f"radio_user_level_review_{btn_type}")
             level.setChecked(False)
 
             checkboxes = getattr(self, f"check_srs_{btn_type}_buttons")
