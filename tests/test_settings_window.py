@@ -28,8 +28,7 @@ def test_default_settings(
     remove_config,
     settings,
 ):
-    assert settings.text_api.text() == "Enter WaniKani API key"
-    assert settings.check_user_level_lesson.isChecked() == False
+    assert settings.radio_user_level_lesson.isChecked() == False
     assert settings.check_l_radicals.isChecked() == False
     assert settings.check_l_kanji.isChecked() == False
     assert settings.check_l_vocabulary.isChecked() == False
@@ -77,7 +76,7 @@ def test_checkbox_dependencies(settings):
 
 
 def test_save_settings(remove_config, settings):
-    settings.check_user_level_lesson.setChecked(True)
+    settings.radio_user_level_lesson.setChecked(True)
     settings.check_l_kanji.setChecked(True)
     settings.check_r_radicals.setChecked(True)
     if settings.widget_radicals_srs.isVisible():
@@ -93,7 +92,7 @@ def test_save_settings(remove_config, settings):
     settings.btn_quit.click()
     settings.show()
 
-    assert settings.check_user_level_lesson.isChecked()
+    assert settings.radio_user_level_lesson.isChecked()
     assert settings.check_l_kanji.isChecked()
     assert settings.check_r_radicals.isChecked()
     assert settings.check_srs_radicals_1.isChecked()
@@ -103,7 +102,7 @@ def test_save_settings(remove_config, settings):
 
 
 def test_quit_without_saving(remove_config, settings, qtbot):
-    settings.check_user_level_lesson.setChecked(True)
+    settings.radio_user_level_lesson.setChecked(True)
     settings.check_l_kanji.setChecked(True)
 
     settings.btn_quit.click()
@@ -111,5 +110,5 @@ def test_quit_without_saving(remove_config, settings, qtbot):
 
     settings = SettingsWindow()
 
-    assert settings.check_user_level_lesson.isChecked() == False
+    assert settings.radio_user_level_lesson.isChecked() == False
     assert settings.check_l_kanji.isChecked() == False

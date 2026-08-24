@@ -115,7 +115,6 @@ class SettingsWindow(QWidget, Ui_Settings):
             self.check_l_vocabulary.setChecked(data["lessons"]["vocabulary"])
             self.radio_user_level_lesson.setChecked(data["lessons"]["only_user_level"])
             self.radio_specific_level_lesson.setChecked(data["lessons"]["is_specific_selected"])
-            print(f"{data["lessons"]["specific_levels"]}")
             self.line_specific_level_lessons.setText(f"{data["lessons"]["specific_levels"]}")
 
             # Reviews

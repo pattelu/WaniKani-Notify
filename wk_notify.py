@@ -156,7 +156,6 @@ def create_query(task_type, user_level, future=False):
                     query += f"&levels={data["reviews"]["vocabulary"]["specific_levels"]}"
                 query_list.append(query)
 
-    print(query_list)
     return query_list
 
 
